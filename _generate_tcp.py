@@ -1,31 +1,35 @@
 import socket
-s=int
-v=sys.exit
-V=sys.stdout
+X=int
+t=socket.socket
+c=socket.AF_INET
+a=socket.SOCK_STREAM
+import sys
+K=sys.exit
+r=sys.stdout
 import time
-z=time.sleep
+M=time.sleep
 import thread
-g=thread.start_new_thread
-ip='127.0.0.1'
-lp='1'
-hp='2048'
-f=s(lp)
-D=s(hp)
-def q(ip,f):
+C=thread.start_new_thread
+ip="127.0.0.1"
+lp="1"
+hp="2048"
+E=X(lp)
+V=X(hp)
+def H(ip,E):
  try:
-  o=socket(AF_INET,SOCK_STREAM)
-  o.connect((ip,f))
-  o.close()
-  v()
+  B=t(c,a)
+  B.connect(ip,E)
+  B.close()
+  K()
  except:
   pass
  finally:
   pass
-while f<D:
- f+=1
- g(q,(ip,f))
- if f%10==0:
-  V.write(".")
-  V.flush()
- z(0.008)
-v()
+while E<V:
+ E+=1
+ C(H,(ip,E))
+ if E%10==0:
+  r.write(".")
+  r.flush()
+ M(0.008)
+K()

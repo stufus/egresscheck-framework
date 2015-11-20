@@ -1,11 +1,13 @@
 # EgressChecker
 
-EgressChecker is a mini-framework used to check for egress filtering on both windows and unix client systems.
+EgressChecker is a mini-framework which can be used to help check for egress filtering between your host and a client system on which you have the ability to execute commands and scripts.
 
 ## Summary
 Most penetration testers have, at one time or another, had the need to measure or circumvent data egress security controls; red team exercises, targeted attack simulations and some internal penetration tests are good examples. For the purposes of simplicity, assume that there is an opportunity to execute code on either a Windows or a UNIX machine; the next stage would be to effectively 'portscan' your machine's IP address from the compromised machine in order to find out which ports can be used to egress data. 
 
-This is not a new problem; there are a large number of scripts and tools designed to meet this need and the majority do this very well. This tool aims to extend the principles on which the other tools have been built, offering a few additional features in a slightly more user-friendly way. 
+This is not a new problem; there are a large number of scripts and tools designed to meet this need and the majority do this very well. This tool aims to improve on the principles on which the other tools have been built, offering a few additional features in a slightly more user-friendly way. 
+
+I wanted a tool that could offer something for both windows and UNIX systems, that would present the commands and tools to run as one-liners, that could format the results and does not require me to immediately kill all my existing listeners.  
  
 ## Components
 

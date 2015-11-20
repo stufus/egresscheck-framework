@@ -7,7 +7,7 @@ Most penetration testers have, at one time or another, had the need to measure o
 
 This is not a new problem; there are a large number of scripts and tools designed to meet this need and the majority do this very well. This tool aims to improve on the principles on which the other tools have been built, offering a few additional features in a slightly more user-friendly way. 
 
-I wanted a tool that could offer something for both windows and UNIX systems, that would present the commands and tools to run as one-liners, that could format the results and does not require me to immediately kill all my existing listeners.  
+I wanted a tool that could offer something for both windows and UNIX systems, that would present the commands and tools to run as one-liners, could offer both TCP and UDP, that could take advantage of native tools on the client, that could format the results and does not require me to immediately kill all my existing listeners.  
  
 ## Components
 

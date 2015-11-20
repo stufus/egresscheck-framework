@@ -25,8 +25,8 @@ The basic approach is to:
 * Use tcpdump to monitor connections to your machine. EgressChecker will print the command that you need to run to perform the necessary capturing and filtering. If used in TCP mode, it just looks for SYN packets. Tcpdump will be configured to save the filtered capture file.
 * Parse the tcpdump file, from which the results can be displayed in a number of formats, useful for other tools or simply for reporting.
 
-# FAQs
-## Why tcpdump?
+## FAQs
+### Why tcpdump?
 
 There are a number of different approaches that others have implemented and that I've tried. However, I have had mixed results from them. 
 
@@ -36,6 +36,6 @@ Another tool worked by opening up listening sockets on a large number of ports o
 
 A different tool worked by using iptables to redirect all traffic to a single port, and monitored that port. I couldn't use it because FreeBSD doesn't have iptables, so it did not work for me.
 
-## Is it stealthy?
+### Is it stealthy?
 
 Not really. You can configure a delay between packets being generated if you want to. I've tried to keep the client code (one liners) as small as possible; they really are very simple scripts.

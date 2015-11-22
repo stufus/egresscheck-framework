@@ -36,6 +36,8 @@ Another tool worked by opening up listening sockets on a large number of ports o
 
 A different tool worked by using iptables to redirect all traffic to a single port, and monitored that port. I couldn't use it because FreeBSD doesn't have iptables, so it did not work for me.
 
+Using tcpdump has a few other benefits too; for example, it does not require listeners to be set up. In addition, this technique could easily be used on machines several layers deep on a target network. If access to a machine has been compromised through a pivot with sufficient privileges to dump traffic, internal egress could be assessed too.
+
 ### Is it stealthy?
 
 Not really. You can configure a delay between packets being generated if you want to. I've tried to keep the client code (one liners) as small as possible; they really are very simple scripts.

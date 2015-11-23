@@ -28,7 +28,9 @@ def generate_oneliner(lang):
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
 	        pycmd += "\ndef H(ip,E):"
 	        pycmd += "\n try:"
-	        pycmd += "\n  B=t(c,socket.SOCK_STREAM);B.connect((ip,E));B.close()"
+	        pycmd += "\n  B=t(c,socket.SOCK_STREAM)"
+            pycmd += "\n  B.connect((ip,E))"
+            pycmd += "\n  B.close()"
 	        pycmd += "\n  K()"
 	        if int(ec_opts['VERBOSITY']['value'])>0:
 	            pycmd += "\n except socket.error, msg:"
@@ -42,14 +44,16 @@ def generate_oneliner(lang):
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
 	        pycmd += "\ndef J(ip,E):"
 	        pycmd += "\n try:"
-	        pycmd += "\n  B=t(c,socket.SOCK_DGRAM);B.sendto('.',(ip,E));B.close()"
+	        pycmd += "\n  B=t(c,socket.SOCK_DGRAM)"
+            pycmd += "\n  B.sendto('.',(ip,E))"
+            pycmd += "\n  B.close()"
 	        pycmd += "\n  K()"
 	        if int(ec_opts['VERBOSITY']['value'])>0:
 	            pycmd += "\n except socket.error, msg:"
 	            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
 	        pycmd += "\n except:"
 	        if int(ec_opts['VERBOSITY']['value'])>0:
-	            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
+	            pycmd += "\n  r.write('[Error:'+str(E)+']')"
 	        else:
 	            pycmd += "\n  pass"
         pycmd += "\nwhile E<V:"
@@ -57,10 +61,10 @@ def generate_oneliner(lang):
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "\n C(H,(ip,E))"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n J(H,(ip,E))"
+            pycmd += "\n C(J,(ip,E))"
         if int(ec_opts['VERBOSITY']['value'])>1:
             pycmd += "\n if E%10==0:"
-            pycmd += "\n  r.write('.');r.flush()"
+            pycmd += "\n  r.write('.')"
         if int(ec_opts['DELAY']['value'])>0:
             pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
         else:

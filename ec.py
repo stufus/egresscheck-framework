@@ -24,6 +24,17 @@ def generate_oneliner(lang):
             pycmd += 'a=socket.SOCK_STREAM;'
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += 'Z=socket.SOCK_DGRAM;'
+        pycmd += 'ip="'+ec_opts['TARGETIP']['value']+'";'
+        pycmd += 'lp="'+ec_opts['PORTSTART']['value']+'";'
+        pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
+        pycmd += 'E=X(lp);V=X(hp)'
+        pycmd += 'def H(ip,E):'
+        pycmd += "\n try:"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += "\n  B=t(c,a);B.connect(ip,E);B.close()"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += "\n  B=t(c,Z);B.sendto('.',(ip,E));B.close()"
+        pycmd += "\n  K()"
         print pycmd
 
 class ec(cmd.Cmd):

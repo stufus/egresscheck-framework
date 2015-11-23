@@ -14,7 +14,7 @@ ec_opts = { 'REMOTEIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0
             'PROTOCOL': { 'value': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
             'DELAY': { 'value': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
-                 }
+           }
 
 def generate_oneliner(lang):
     if lang=='python':
@@ -26,36 +26,36 @@ def generate_oneliner(lang):
         pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
         pycmd += 'E=X(lp);V=X(hp)'
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-	        pycmd += "\ndef H(ip,E):"
-	        pycmd += "\n try:"
-	        pycmd += "\n  B=t(c,socket.SOCK_STREAM)"
+            pycmd += "\ndef H(ip,E):"
+            pycmd += "\n try:"
+            pycmd += "\n  B=t(c,socket.SOCK_STREAM)"
             pycmd += "\n  B.connect((ip,E))"
             pycmd += "\n  B.close()"
-	        pycmd += "\n  K()"
-	        if int(ec_opts['VERBOSITY']['value'])>0:
-	            pycmd += "\n except socket.error, msg:"
-	            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
-	        pycmd += "\n except:"
-	        if int(ec_opts['VERBOSITY']['value'])>0:
-	            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
-	        else:
-	            pycmd += "\n  pass"
+            pycmd += "\n  K()"
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "\n except socket.error, msg:"
+                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+            pycmd += "\n except:"
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
+            else:
+                pycmd += "\n  pass"
 
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-	        pycmd += "\ndef J(ip,E):"
-	        pycmd += "\n try:"
-	        pycmd += "\n  B=t(c,socket.SOCK_DGRAM)"
+            pycmd += "\ndef J(ip,E):"
+            pycmd += "\n try:"
+            pycmd += "\n  B=t(c,socket.SOCK_DGRAM)"
             pycmd += "\n  B.sendto('.',(ip,E))"
             pycmd += "\n  B.close()"
-	        pycmd += "\n  K()"
-	        if int(ec_opts['VERBOSITY']['value'])>0:
-	            pycmd += "\n except socket.error, msg:"
-	            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
-	        pycmd += "\n except:"
-	        if int(ec_opts['VERBOSITY']['value'])>0:
-	            pycmd += "\n  r.write('[Error:'+str(E)+']')"
-	        else:
-	            pycmd += "\n  pass"
+            pycmd += "\n  K()"
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "\n except socket.error, msg:"
+                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+            pycmd += "\n except:"
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "\n  r.write('[Error:'+str(E)+']')"
+            else:
+                pycmd += "\n  pass"
         pycmd += "\nwhile E<V:"
         pycmd += "\n E+=1"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
@@ -92,26 +92,26 @@ class ec(cmd.Cmd):
 
     def do_set(self, param):
         if param != '':
-	        cmdVariable = param.split()[0].upper()
-	        if cmdVariable in ec_opts.keys():
-	            cmdParam = param.split()[1]
-	            if re.match(ec_opts[cmdVariable]['validation'],cmdParam):
-	                ec_opts[cmdVariable]['value'] = cmdParam
-	                print cmdVariable+' => '+cmdParam
-	            else:
-	                print "Error: Invalid "+cmdVariable+" setting provided"
-	        else:
-	            print "Error: "+cmdVariable+" is not recognised"
+            cmdVariable = param.split()[0].upper()
+            if cmdVariable in ec_opts.keys():
+                cmdParam = param.split()[1]
+                if re.match(ec_opts[cmdVariable]['validation'],cmdParam):
+                    ec_opts[cmdVariable]['value'] = cmdParam
+                    print cmdVariable+' => '+cmdParam
+                else:
+                    print "Error: Invalid "+cmdVariable+" setting provided"
+            else:
+                print "Error: "+cmdVariable+" is not recognised"
         else:
             print "Error: Variable name required. Use \'get\' to see all variables"
      
     def do_get(self, param):
         if param != '':
-	        cmdVariable = param.split()[0].upper()
-	        if cmdVariable in ec_opts.keys():
-	            print cmdVariable+' = '+ec_opts[cmdVariable]['value']
-	        else:
-	            print "Error: "+cmdVariable+" not found"
+            cmdVariable = param.split()[0].upper()
+            if cmdVariable in ec_opts.keys():
+                print cmdVariable+' = '+ec_opts[cmdVariable]['value']
+            else:
+                print "Error: "+cmdVariable+" not found"
         else:  
             print "Showing all variables:"
 

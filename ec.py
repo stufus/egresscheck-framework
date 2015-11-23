@@ -25,23 +25,39 @@ def generate_oneliner(lang):
         pycmd += 'lp="'+ec_opts['PORTSTART']['value']+'";'
         pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
         pycmd += 'E=X(lp);V=X(hp)'
-        pycmd += "\ndef H(ip,E):"
-        pycmd += "\n try:"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n  B=t(c,socket.SOCK_STREAM);B.connect((ip,E));B.close()"
+	        pycmd += "\ndef H(ip,E):"
+	        pycmd += "\n try:"
+	        pycmd += "\n  B=t(c,socket.SOCK_STREAM);B.connect((ip,E));B.close()"
+	        pycmd += "\n  K()"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+	            pycmd += "\n except socket.error, msg:"
+	            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+	        pycmd += "\n except:"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+	            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
+	        else:
+	            pycmd += "\n  pass"
+
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n  B=t(c,socket.SOCK_DGRAM);B.sendto('.',(ip,E));B.close()"
-        pycmd += "\n  K()"
-        if int(ec_opts['VERBOSITY']['value'])>0:
-            pycmd += "\n except socket.error, msg:"
-            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
-        pycmd += "\n except:"
-        if int(ec_opts['VERBOSITY']['value'])>0:
-            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
-        else:
-            pycmd += "\n  pass"
+	        pycmd += "\ndef JH(ip,E):"
+	        pycmd += "\n try:"
+	        pycmd += "\n  B=t(c,socket.SOCK_DGRAM);B.sendto('.',(ip,E));B.close()"
+	        pycmd += "\n  K()"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+	            pycmd += "\n except socket.error, msg:"
+	            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+	        pycmd += "\n except:"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+	            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
+	        else:
+	            pycmd += "\n  pass"
         pycmd += "\nwhile E<V:"
-        pycmd += "\n E+=1;C(H,(ip,E))"
+        pycmd += "\n E+=1"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += "\n C(H,(ip,E))"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += "\n J(H,(ip,E))"
         if int(ec_opts['VERBOSITY']['value'])>1:
             pycmd += "\n if E%10==0:"
             pycmd += "\n  r.write('.');r.flush()"

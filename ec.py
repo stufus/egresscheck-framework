@@ -63,10 +63,12 @@ class ec(cmd.Cmd):
                 code = generate_oneliner(cmdLang)
                 print code+"\n\n"
                 print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
+            elif cmdLang == 'tcpdump':
+                pass
             else:
                 print "Error: Invalid language specified."
         else:
-            print "Error: Must specify a language. Currently, python is the only supported language." 
+            print "Error: Must specify a language. Currently, 'python' and 'tcpdump' are the only supported options." 
 
     def do_set(self, param):
         if param != '':

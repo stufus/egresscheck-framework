@@ -10,12 +10,35 @@ ec_opts = { 'REMOTEIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0
             'TARGETIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
             'PORTSTART': { 'value': '1', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the starting port for the egress attempt.' },
             'PORTFINISH': { 'value': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
-            'PROTOCOL': { 'value': 'TCP', 'validation':'^(TCP|UDP|all)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'all\' (attempts both TCP and UDP).' }
+            'PROTOCOL': { 'value': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
+            'VERBOSITY': { 'value': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
+            'DELAY': { 'value': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
                  }
+
+def generate_oneliner(lang):
+    if lang=='python':
+        pycmd = 'import time;import thread;import sys;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
+        if int(ec_opts['VERBOSITY']['value'])>0:
+            pycmd += 'r=sys.stdout;'
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += 'a=socket.SOCK_STREAM;'
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            pycmd += 'Z=socket.SOCK_DGRAM;'
+        print pycmd
 
 class ec(cmd.Cmd):
 
     prompt = "egresschecker> "
+
+    def do_generate(self, param):
+        if param != '':
+            cmdLang = param.split()[0].lower()
+            if cmdLang == 'python':
+                generate_oneliner(cmdLang)
+            else:
+                print "Error: Invalid language specified."
+        else:
+            print "Error: Must specify a language. Currently, python is the only supported language." 
 
     def do_set(self, param):
         if param != '':

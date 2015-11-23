@@ -40,7 +40,7 @@ def generate_oneliner(lang):
 	            pycmd += "\n  pass"
 
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-	        pycmd += "\ndef JH(ip,E):"
+	        pycmd += "\ndef J(ip,E):"
 	        pycmd += "\n try:"
 	        pycmd += "\n  B=t(c,socket.SOCK_DGRAM);B.sendto('.',(ip,E));B.close()"
 	        pycmd += "\n  K()"

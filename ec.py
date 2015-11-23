@@ -37,7 +37,7 @@ def generate_oneliner(lang):
         pycmd += "\n  K()"
         pycmd += "\n except:"
         if int(ec_opts['VERBOSITY']['value'])>0:
-            pycmd += "\n  r.write('Error to '+str(E));r.flush()"
+            pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
         else:
             pycmd += "\n  pass"
         pycmd += "\nwhile E<V:"

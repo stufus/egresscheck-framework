@@ -7,18 +7,18 @@ import sys
 import base64
 
 # Global variable to store the various user-configurable options
-ec_opts = { 'REMOTEIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the target machine. It is used to filter out unwanted traffic.' },
-            'TARGETIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
-            'PORTSTART': { 'value': '1', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the starting port for the egress attempt.' },
-            'PORTFINISH': { 'value': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
-            'PROTOCOL': { 'value': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
-            'VERBOSITY': { 'value': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
-            'DELAY': { 'value': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
-           }
+ec_opts = { 'REMOTEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the target machine. It is used to filter out unwanted traffic.' },
+            'TARGETIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
+            'PORTSTART': { 'value': '1', 'default': '1', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the starting port for the egress attempt.' },
+            'PORTFINISH': { 'value': '65535', 'default': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
+            'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
+            'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
+            'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
+          }
 
 def generate_oneliner(lang):
     if lang=='python':
-        pycmd = 'import time;import thread;import sys;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
+        pycmd = 'import time;import thread;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
         if int(ec_opts['VERBOSITY']['value'])>0:
             pycmd += 'r=sys.stdout;'
         pycmd += 'ip="'+ec_opts['TARGETIP']['value']+'";'
@@ -56,6 +56,7 @@ def generate_oneliner(lang):
                 pycmd += "\n  r.write('[Error:'+str(E)+']')"
             else:
                 pycmd += "\n  pass"
+
         pycmd += "\nwhile E<V:"
         pycmd += "\n E+=1"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
@@ -81,7 +82,6 @@ class ec(cmd.Cmd):
             cmdLang = param.split()[0].lower()
             if cmdLang == 'python':
                 code = generate_oneliner(cmdLang)
-                print code+"\n\n"
                 print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             elif cmdLang == 'tcpdump':
                 pass

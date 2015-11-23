@@ -4,6 +4,7 @@ import re
 import cmd
 import signal
 import sys
+import base64
 
 # Global variable to store the various user-configurable options
 ec_opts = { 'REMOTEIP': { 'value': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the target machine. It is used to filter out unwanted traffic.' },
@@ -20,10 +21,6 @@ def generate_oneliner(lang):
         pycmd = 'import time;import thread;import sys;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
         if int(ec_opts['VERBOSITY']['value'])>0:
             pycmd += 'r=sys.stdout;'
-        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += 'a=socket.SOCK_STREAM;'
-        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += 'Z=socket.SOCK_DGRAM;'
         pycmd += 'ip="'+ec_opts['TARGETIP']['value']+'";'
         pycmd += 'lp="'+ec_opts['PORTSTART']['value']+'";'
         pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
@@ -31,10 +28,13 @@ def generate_oneliner(lang):
         pycmd += "\ndef H(ip,E):"
         pycmd += "\n try:"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n  B=t(c,a);B.connect(ip,E);B.close()"
+            pycmd += "\n  B=t(c,socket.SOCK_STREAM);B.connect((ip,E));B.close()"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n  B=t(c,Z);B.sendto('.',(ip,E));B.close()"
+            pycmd += "\n  B=t(c,socket.SOCK_DGRAM);B.sendto('.',(ip,E));B.close()"
         pycmd += "\n  K()"
+        if int(ec_opts['VERBOSITY']['value'])>0:
+            pycmd += "\n except socket.error, msg:"
+            pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
         pycmd += "\n except:"
         if int(ec_opts['VERBOSITY']['value'])>0:
             pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
@@ -50,7 +50,7 @@ def generate_oneliner(lang):
         else:
             pycmd += "\n M(0.01)"
         pycmd += "\nK()"
-        print pycmd
+        return pycmd
 
 class ec(cmd.Cmd):
 
@@ -60,7 +60,9 @@ class ec(cmd.Cmd):
         if param != '':
             cmdLang = param.split()[0].lower()
             if cmdLang == 'python':
-                generate_oneliner(cmdLang)
+                code = generate_oneliner(cmdLang)
+                print code+"\n\n"
+                print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             else:
                 print "Error: Invalid language specified."
         else:

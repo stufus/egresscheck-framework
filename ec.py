@@ -28,13 +28,28 @@ def generate_oneliner(lang):
         pycmd += 'lp="'+ec_opts['PORTSTART']['value']+'";'
         pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
         pycmd += 'E=X(lp);V=X(hp)'
-        pycmd += 'def H(ip,E):'
+        pycmd += "\ndef H(ip,E):"
         pycmd += "\n try:"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "\n  B=t(c,a);B.connect(ip,E);B.close()"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "\n  B=t(c,Z);B.sendto('.',(ip,E));B.close()"
         pycmd += "\n  K()"
+        pycmd += "\n except:"
+        if int(ec_opts['VERBOSITY']['value'])>0:
+            pycmd += "\n  r('Error to '+str(E))"
+        else:
+            pycmd += "\n  pass"
+        pycmd += "\nwhile E<V:"
+        pycmd += "\n E+=1;C(H,(ip,E))"
+        if int(ec_opts['VERBOSITY']['value'])>1:
+            pycmd += "\n if E%10==0:"
+            pycmd += "\n  r.write('.');r.flush()"
+        if int(ec_opts['DELAY']['value'])>0:
+            pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
+        else:
+            pycmd += "\n M(0.01)"
+        pycmd += "\nK()"
         print pycmd
 
 class ec(cmd.Cmd):

@@ -17,6 +17,8 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-
             'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' }
           }
 
+ec_version = "v0.1-pre1"
+
 def colourise(string,colour):
     return "\033["+colour+"m"+string+"\033[0m"
 
@@ -192,4 +194,7 @@ def signal_handler(signum, frame):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
+    print "EgressChecker "+ec_version
+    print "Stuart Morgan https://github.com/stufus"
+    print "\n"
     ec().cmdloop()

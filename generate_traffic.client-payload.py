@@ -1,4 +1,3 @@
-import pprint
 import socket
 import sys
 import time
@@ -56,10 +55,8 @@ def portscan(ip,ports):
     
 # Now go through and build the thread lists
 threadports = build_threads(int(threads),int(lowport),int(highport))
-pprint.pprint(threadports)
 for i in threadports:
-    t = threading.Thread(target=portscan, args=(ip_address,i,))
-    t.start()
+    threading.Thread(target=portscan, args=(ip_address,i,)).start()
 
 # Now join the threads to the main one
 main_thread = threading.currentThread()

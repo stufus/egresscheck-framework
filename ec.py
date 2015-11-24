@@ -93,7 +93,7 @@ def generate_oneliner(lang):
         
         # Now generate the tcpdump capture command line. Yes I know I'm using mktemp()...
         tf = tempfile.mktemp('.pcap','egress_')
-        tcpdump_run = 'tcpdump -n -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
+        tcpdump_run = 'tcpdump -n -U -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
         tshark_run = 'tshark -r '+tf+' -Tfields -eip.proto -eip.src -etcp.dstport | sort -u'
         pycmd = [tcpdump_run,tshark_run]
 

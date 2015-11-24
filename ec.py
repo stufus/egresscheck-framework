@@ -39,7 +39,7 @@ def generate_oneliner(lang):
             pycmd += "\n  K()"
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "\n except socket.error, msg:"
-                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']');r.flush()"
             pycmd += "\n except:"
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
@@ -55,10 +55,10 @@ def generate_oneliner(lang):
             pycmd += "\n  K()"
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "\n except socket.error, msg:"
-                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']')"
+                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']');r.flush()"
             pycmd += "\n except:"
             if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += "\n  r.write('[Error:'+str(E)+']')"
+                pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
             else:
                 pycmd += "\n  pass"
 
@@ -70,7 +70,7 @@ def generate_oneliner(lang):
             pycmd += "\n C(J,(ip,E))"
         if int(ec_opts['VERBOSITY']['value'])>1:
             pycmd += "\n if E%10==0:"
-            pycmd += "\n  r.write('.')"
+            pycmd += "\n  r.write('.');r.flush()"
         if int(ec_opts['DELAY']['value'])>0:
             pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
         else:

@@ -120,6 +120,7 @@ class ec(cmd.Cmd):
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='python'):
                     print colourise('Run the code below on the client machine:','0;32')
+                    print 'import sys'
                     print code
                 elif (cmdLang=='python-cmd'):
                     print colourise('Run the command below on the client machine:','0;32')
@@ -134,6 +135,16 @@ class ec(cmd.Cmd):
             else:
                 print colourise('Error:','31;1')+" Invalid language specified."
                 print_supported_languages()
+
+    def complete_set(self, text, line, begidx, endidx):
+        param = line.partition(' ')[2].upper()
+        offset = len(param) - len(text)
+        return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
+
+    def complete_get(self, text, line, begidx, endidx):
+        param = line.partition(' ')[2].upper()
+        offset = len(param) - len(text)
+        return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
 
     def do_set(self, param):
         if param != '':

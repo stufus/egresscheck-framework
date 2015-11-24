@@ -74,7 +74,7 @@ def generate_oneliner(lang):
         if int(ec_opts['DELAY']['value'])>0:
             pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
         else:
-            pycmd += "\n M(0.1)"
+            pycmd += "\n M(0.05)"
         pycmd += "\nK()"
 
     elif lang=='tcpdump':
@@ -87,13 +87,13 @@ def generate_oneliner(lang):
         # Now deal with protocol specifics
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)=tcp-syn && tcp)')
+            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)>0 && (tcp[tcpflags]&tcp-ack)==0 && tcp)')
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
         
         # Now generate the tcpdump capture command line. Yes I know I'm using mktemp()...
         tf = tempfile.mktemp('.pcap','egress_')
-        tcpdump_run = 'tcpdump -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
+        tcpdump_run = 'tcpdump -n -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
         tshark_run = 'tshark -r '+tf+' -Tfields -eip.proto -eip.src -etcp.dstport | sort -u'
         pycmd = [tcpdump_run,tshark_run]
 

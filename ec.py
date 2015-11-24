@@ -14,7 +14,7 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-
             'PORTFINISH': { 'value': '65535', 'default': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
-            'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
+            'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' }
           }
 
 def colourise(string,colour):
@@ -71,8 +71,8 @@ def generate_oneliner(lang):
         if int(ec_opts['VERBOSITY']['value'])>1:
             pycmd += "\n if E%10==0:"
             pycmd += "\n  r.write('.');r.flush()"
-        if int(ec_opts['DELAY']['value'])>0:
-            pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
+        if ec_opts['DELAY']['value']:
+            pycmd += "\n M("+ec_opts['DELAY']['value']+")"
         else:
             pycmd += "\n M(0.05)"
         pycmd += "\nK()"

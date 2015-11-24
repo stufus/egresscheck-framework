@@ -74,7 +74,7 @@ def generate_oneliner(lang):
         if int(ec_opts['DELAY']['value'])>0:
             pycmd += "\n M("+str(int(ec_opts['DELAY']['value']))+")"
         else:
-            pycmd += "\n M(0.01)"
+            pycmd += "\n M(0.1)"
         pycmd += "\nK()"
 
     elif lang=='tcpdump':
@@ -106,7 +106,7 @@ def print_supported_languages():
 
 class ec(cmd.Cmd):
 
-    prompt = "egresschecker> "
+    prompt = colourise('egresschecker>','0;36')+" "
 
     def do_generate(self, param):
         if ec_opts['TARGETIP']['value'].strip()=='':
@@ -119,12 +119,16 @@ class ec(cmd.Cmd):
             if (cmdLang == 'python' or cmdLang=='python-cmd'):
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='python'):
+                    print colourise('Run the code below on the client machine:','0;32')
                     print code
                 elif (cmdLang=='python-cmd'):
+                    print colourise('Run the command below on the client machine:','0;32')
                     print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
+                print colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32')
                 print code[0]
+                print colourise('The command below will parse the saved capture file and display the ports on which connections were received:','0;32')
                 print code[1]
                 pass
             else:

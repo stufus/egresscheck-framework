@@ -85,13 +85,11 @@ def generate_oneliner(lang):
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)>0 && tcp)')
-
-        if (ec_opts['PROTOCOL']['value']=='UCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
         
-        tf = tempfile.mktemp('.pcap','egress_')
-        pycmd = 'tcpdump -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
-        pass
+        # Now generate the tcpdump capture command line. Yes I know I'm using mktemp()...
+        pycmd = 'tcpdump -w '+tempfile.mktemp('.pcap','egress_')+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
 
     return pycmd
 
@@ -105,7 +103,12 @@ class ec(cmd.Cmd):
     prompt = "egresschecker> "
 
     def do_generate(self, param):
-        if param != '':
+        if ec_opts['TARGETIP']['value'].strip()=='':
+            print "Error: Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
+        elif param == '':
+            print "Error: Must specify a language."
+            print_supported_languages()
+        else:
             cmdLang = param.split()[0].lower()
             if (cmdLang == 'python' or cmdLang=='python-cmd'):
                 code = generate_oneliner(cmdLang)
@@ -120,9 +123,6 @@ class ec(cmd.Cmd):
             else:
                 print "Error: Invalid language specified."
                 print_supported_languages()
-        else:
-            print "Error: Must specify a language."
-            print_supported_languages()
 
     def do_set(self, param):
         if param != '':

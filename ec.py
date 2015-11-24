@@ -87,7 +87,7 @@ def generate_oneliner(lang):
         # Now deal with protocol specifics
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)>0 && tcp)')
+            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)=tcp-syn && tcp)')
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
         
@@ -158,7 +158,12 @@ class ec(cmd.Cmd):
             else:
                 print colourise('Error:','31;1')+" "+cmdVariable+" not found"
         else:  
-            print "Showing all variables:"
+            print "|"+'-'*14+"|"+'-'*19+"|"
+            print "| %-12s | %-17s |" % ('Option','Value')
+            print "|"+'-'*14+"|"+'-'*19+"|"
+            for k,v in ec_opts.iteritems():
+                print "| %-12s | %-17s |" % (k,v['value'])
+            print "|"+'-'*14+"|"+'-'*19+"|"
 
     def do_quit(self, param):
         print ""

@@ -23,7 +23,7 @@ def colourise(string,colour):
 
 def banner():
     print ""
-    print "       .mMMMMMm.           mMMm    M  WWW   W    W  RRRRR"
+    print "       .mMMMMMm.             MMm    M   WW   W   WW   RRRRR"
     print "      mMMMMMMMMMMM.           MM   MM    W   W   W    R   R"
     print "     /MMMM-    -MM.           MM   MM    W   W   W    R   R"
     print "    /MMM.    _  \/  ^         M M M M     W W W W     RRRR"

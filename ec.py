@@ -195,6 +195,5 @@ def signal_handler(signum, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     print "EgressChecker "+ec_version
-    print "Stuart Morgan https://github.com/stufus"
-    print "\n"
+    print "Stuart Morgan - https://github.com/stufus\n"
     ec().cmdloop()

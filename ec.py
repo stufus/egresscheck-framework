@@ -31,8 +31,8 @@ def banner():
     print "    \/  .. ^^^   wWWW|        M  M  M      W   W      R   R"
     print "       /WW\.  .wWWWW/         M  M  M      W   W      R    R"
     print "       |WWWWWWWWWWW/"
-    print "         .WWWWWW.        EgressChecker Mini-Framework "+ec_version+" / @ukstufus"
-    print "                            stuart.morgan@mwrinfosecurity.com"
+    print "         .WWWWWW.        EgressChecker Mini-Framework "+ec_version
+    print "                     stuart.morgan@mwrinfosecurity.com | @ukstufus"
     print ""
 
 def generate_oneliner(lang):

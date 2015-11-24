@@ -1,28 +1,29 @@
 import socket
 import sys
 import time
-import thread
+import threading
 import pprint
 
 #Set IP addresses and parameters
 ip_address = "127.0.0.1"
 lowport = "1"
-highport = "100"
-threads = "50"
+highport = "1024"
+threads = "100"
 
 # cycle through ranges
 base_port = int(lowport)
 end_port = int(highport)
 
 # Function to actually send the traffic
-def connect_tcp(ip_address,base_port):
+def connect_tcp(ip,base_port):
     try:
         sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sockobj.connect((ip_address, base_port))
+        sockobj.connect((ip, base_port))
         sockobj.close()
     except:
-        pass
+        pass 
 
+# Divvy up the ports into arrays to be scanned by each thread
 def build_threads(num_threads,lowport,highport):
     # If there are too many threads, reduce down to the number needed
     threadports = []
@@ -39,13 +40,22 @@ def build_threads(num_threads,lowport,highport):
             groupcount+=1
     return threadports
 
-#while base_port<end_port:
-#    base_port+=1 
-#    thread.start_new_thread(start_socket, (ip_address,base_port))
-#    if base_port % 10 == 0:
-#        sys.stdout.write(".") 
-#        sys.stdout.flush()
-#    time.sleep(0.008)
-threads = build_threads(int(threads),int(lowport),int(highport))
+# Perform a TCP portscan
+def portscan_tcp(ip,ports):
+    for p in ports:
+        connect_tcp(ip,p)
+    
+# Now go through and build the thread lists
+threadports = build_threads(int(threads),int(lowport),int(highport))
+for i in threadports:
+    t = threading.Thread(target=portscan_tcp, args=(ip_address,i,))
+    t.start()
 
-sys.exit()
+# Now join the threads to the main one
+main_thread = threading.currentThread()
+for t in threading.enumerate():
+    if t is not main_thread:
+        t.join()
+
+# Finally exit
+sys.exit(0)

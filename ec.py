@@ -17,6 +17,9 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-
             'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+$', 'required': 1, 'description':'Delay been generation of packets.' }
           }
 
+def colourise(string,colour):
+    return "\033["+colour+"m"+string+"\033[0m"
+
 def generate_oneliner(lang):
     pycmd = ''
     if (lang=='python' or lang=='python-cmd'):
@@ -89,7 +92,10 @@ def generate_oneliner(lang):
             tcpdump_proto.append('(udp)')
         
         # Now generate the tcpdump capture command line. Yes I know I'm using mktemp()...
-        pycmd = 'tcpdump -w '+tempfile.mktemp('.pcap','egress_')+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
+        tf = tempfile.mktemp('.pcap','egress_')
+        tcpdump_run = 'tcpdump -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
+        tshark_run = 'tshark -r '+tf+' -Tfields -eip.proto -eip.src -etcp.dstport | sort -u'
+        pycmd = [tcpdump_run,tshark_run]
 
     return pycmd
 
@@ -104,9 +110,9 @@ class ec(cmd.Cmd):
 
     def do_generate(self, param):
         if ec_opts['TARGETIP']['value'].strip()=='':
-            print "Error: Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
+            print colourise('Error:','31;1')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
         elif param == '':
-            print "Error: Must specify a language."
+            print colourise('Error:','31;1')+" Must specify a language."
             print_supported_languages()
         else:
             cmdLang = param.split()[0].lower()
@@ -118,10 +124,11 @@ class ec(cmd.Cmd):
                     print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
-                print code
+                print code[0]
+                print code[1]
                 pass
             else:
-                print "Error: Invalid language specified."
+                print colourise('Error:','31;1')+" Invalid language specified."
                 print_supported_languages()
 
     def do_set(self, param):
@@ -133,11 +140,11 @@ class ec(cmd.Cmd):
                     ec_opts[cmdVariable]['value'] = cmdParam
                     print cmdVariable+' => '+cmdParam
                 else:
-                    print "Error: Invalid "+cmdVariable+" setting provided"
+                    print colourise('Error:','31;1')+" Invalid "+cmdVariable+" setting provided"
             else:
-                print "Error: "+cmdVariable+" is not recognised"
+                print colourise('Error:','31;1')+" "+cmdVariable+" is not recognised"
         else:
-            print "Error: Variable name required. Use \'get\' to see all variables"
+            print colourise('Error:','31;1')+" Variable name required. Use \'get\' to see all variables"
      
     def do_get(self, param):
         if param != '':
@@ -145,7 +152,7 @@ class ec(cmd.Cmd):
             if cmdVariable in ec_opts.keys():
                 print cmdVariable+' = '+ec_opts[cmdVariable]['value']
             else:
-                print "Error: "+cmdVariable+" not found"
+                print colourise('Error:','31;1')+" "+cmdVariable+" not found"
         else:  
             print "Showing all variables:"
 

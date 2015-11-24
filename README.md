@@ -21,7 +21,7 @@ On the basis of the example above, this tool will allow you to connect to 192.16
 
 The basic approach is to:
 
-* Generate a 'one-liner' that can be run on the client. Currently, EgressChecker can generate one-liners in python and ruby, but there is no reason why you could not use any other tool for this purpose.
+* Generate a 'one-liner' that can be run on the client. Currently, EgressChecker can only generate one-liners in python, but I'll add other scripts in the fullness of time.
 * Use tcpdump to monitor connections to your machine. EgressChecker will print the command that you need to run to perform the necessary capturing and filtering. If used in TCP mode, it just looks for SYN packets. Tcpdump will be configured to save the filtered capture file.
 * Parse the tcpdump file, from which the results can be displayed in a number of formats, useful for other tools or simply for reporting.
 
@@ -30,7 +30,7 @@ The basic approach is to:
 
 There are a number of different approaches that others have implemented and that I've tried. However, I have had mixed results from them. 
 
-One tool used scapy sniff packets; despite being a very elegant approach, I found that it did not seem to capture all packets and it was difficult to understand why. 
+One tool used scapy to sniff packets; despite being a very elegant approach, I found that it did not seem to capture all packets. 
 
 Another tool worked by opening up listening sockets on a large number of ports on your machine, and monitoring connections to them. Nothing wrong with it, but you can't do too many at once, and I wanted a solution that would sniff the packets (meaning that you may not have to drop your software firewall, nor would you need to kill any existing listeners that you have).
 

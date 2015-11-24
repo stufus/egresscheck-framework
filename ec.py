@@ -21,6 +21,20 @@ ec_version = "v0.1-pre1"
 def colourise(string,colour):
     return "\033["+colour+"m"+string+"\033[0m"
 
+def banner():
+    print ""
+    print "       .mMMMMMm.           mMMm    M  WWW   W    W  RRRRR"
+    print "      mMMMMMMMMMMM.           MM   MM    W   W   W    R   R"
+    print "     /MMMM-    -MM.           MM   MM    W   W   W    R   R"
+    print "    /MMM.    _  \/  ^         M M M M     W W W W     RRRR"
+    print "    |M.    aRRr    /W|        M M M M     W W W W     R  R"
+    print "    \/  .. ^^^   wWWW|        M  M  M      W   W      R   R"
+    print "       /WW\.  .wWWWW/         M  M  M      W   W      R    R"
+    print "       |WWWWWWWWWWW/"
+    print "         .WWWWWW.        EgressChecker Mini-Framework "+ec_version+" / @ukstufus"
+    print "                            stuart.morgan@mwrinfosecurity.com"
+    print ""
+
 def generate_oneliner(lang):
     pycmd = ''
     if (lang=='python' or lang=='python-cmd'):
@@ -193,6 +207,5 @@ def signal_handler(signum, frame):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
-    print "EgressChecker "+ec_version
-    print "Stuart Morgan - https://github.com/stufus\n"
+    banner()
     ec().cmdloop()

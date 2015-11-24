@@ -23,7 +23,7 @@ The basic approach is to:
 
 * Generate a 'one-liner' that can be run on the client. Currently, EgressChecker can only generate one-liners in python, but I'll add other scripts in the fullness of time.
 * Use tcpdump to monitor connections to your machine. EgressChecker will print the command that you need to run to perform the necessary capturing and filtering. If used in TCP mode, it just looks for SYN packets. Tcpdump will be configured to save the filtered capture file.
-* Parse the tcpdump file, from which the results can be displayed in a number of formats, useful for other tools or simply for reporting.
+* Parse the tcpdump file, from which the results can be displayed in a number of formats, useful for other tools or simply for reporting. Currently, *tshark* is used as a pcap parser; EgressChecker provides the parameters to pass to tshark.
 
 ### Client script
 

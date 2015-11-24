@@ -75,7 +75,7 @@ def generate_oneliner(lang):
 
     elif lang=='tcpdump':
         # Sort out the TCP capture filter
-        tcpdump_cmd = ['dst host'+ec_opts['TARGETIP']['value']]
+        tcpdump_cmd = ['dst host '+ec_opts['TARGETIP']['value']]
         tcpdump_cmd.append('dst portrange '+ec_opts['PORTSTART']['value']+'-'+ec_opts['PORTFINISH']['value'])
         if (ec_opts['SOURCEIP']['value']!=''):
             tcpdump_cmd.append('src host '+ec_opts['SOURCEIP']['value'])
@@ -83,13 +83,12 @@ def generate_oneliner(lang):
         # Now deal with protocol specifics
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('tcp[tcpflags]&tcp-syn)>0 && tcp')
+            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)>0 && tcp)')
 
         if (ec_opts['PROTOCOL']['value']=='UCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('udp')
+            tcpdump_proto.append('(udp)')
 
-        pprint.pprint(tcpdump_cmd)
-        pprint.pprint(tcpdump_proto)
+        pycmd = 'tcpdump \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
         pass
 
     return pycmd
@@ -114,6 +113,7 @@ class ec(cmd.Cmd):
                     print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
+                print code
                 pass
             else:
                 print "Error: Invalid language specified."

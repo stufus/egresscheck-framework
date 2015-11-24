@@ -5,6 +5,7 @@ import cmd
 import signal
 import sys
 import base64
+import tempfile
 
 # Global variable to store the various user-configurable options
 ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the client machine; from your point of view, it is the \'source address\' of the connections. It is used to filter out unwanted traffic.' },
@@ -87,8 +88,9 @@ def generate_oneliner(lang):
 
         if (ec_opts['PROTOCOL']['value']=='UCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
-
-        pycmd = 'tcpdump \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
+        
+        tf = tempfile.mktemp('.pcap','egress_')
+        pycmd = 'tcpdump -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
         pass
 
     return pycmd

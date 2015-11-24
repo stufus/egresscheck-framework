@@ -7,19 +7,26 @@ import pprint
 #Set IP addresses and parameters
 ip_address = "127.0.0.1"
 lowport = "1"
-highport = "1024"
-threads = "100"
+highport = "10"
+threads = "5"
 
-# cycle through ranges
-base_port = int(lowport)
-end_port = int(highport)
-
-# Function to actually send the traffic
+# Function to actually send the traffic (TCP)
 def connect_tcp(ip,base_port):
     try:
         sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sockobj.connect((ip, base_port))
         sockobj.close()
+        print "TCP: "+ip+" "+str(base_port)
+    except:
+        pass 
+
+# Function to actually send the traffic (UDP)
+def connect_udp(ip,base_port):
+    try:
+        sockobj = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sockobj.sendto('.',(ip, base_port))
+        sockobj.close()
+        print "UDP: "+ip+" "+str(base_port)
     except:
         pass 
 
@@ -41,14 +48,15 @@ def build_threads(num_threads,lowport,highport):
     return threadports
 
 # Perform a TCP portscan
-def portscan_tcp(ip,ports):
+def portscan(ip,ports):
     for p in ports:
         connect_tcp(ip,p)
+        connect_udp(ip,p)
     
 # Now go through and build the thread lists
 threadports = build_threads(int(threads),int(lowport),int(highport))
 for i in threadports:
-    t = threading.Thread(target=portscan_tcp, args=(ip_address,i,))
+    t = threading.Thread(target=portscan, args=(ip_address,i,))
     t.start()
 
 # Now join the threads to the main one

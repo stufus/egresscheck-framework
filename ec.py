@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-import pprint
 import re
 import cmd
 import signal
@@ -102,9 +101,9 @@ def generate_oneliner(lang):
     return pycmd
 
 def print_supported_languages():
-    print "   python     | Generates a python egress buster script."
-    print "   python-cmd | Generates a python one-liner designed to be copied and pasted."
-    print "   tcpdump    | Generates the tcpdump capture command to be run on the target machine."
+    print "   python     "+"| Generates a python egress buster script."
+    print "   python-cmd "+"| Generates a python one-liner designed to be copied and pasted."
+    print "   tcpdump    "+"| Generates the tcpdump capture command to be run on the target machine."
 
 class ec(cmd.Cmd):
 
@@ -149,7 +148,7 @@ class ec(cmd.Cmd):
         return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
 
     def do_set(self, param):
-        if param != '':
+        if param != '' and len(param.split())==2:
             cmdVariable = param.split()[0].upper()
             if cmdVariable in ec_opts.keys():
                 cmdParam = param.split()[1]
@@ -161,7 +160,7 @@ class ec(cmd.Cmd):
             else:
                 print colourise('Error:','31;1')+" "+cmdVariable+" is not recognised"
         else:
-            print colourise('Error:','31;1')+" Variable name required. Use \'get\' to see all variables"
+            print colourise('Error:','31;1')+" Variable name and value required. Use \'get\' to see all variables."
      
     def do_get(self, param):
         if param != '':
@@ -171,12 +170,12 @@ class ec(cmd.Cmd):
             else:
                 print colourise('Error:','31;1')+" "+cmdVariable+" not found"
         else:  
-            print "|"+'-'*14+"|"+'-'*19+"|"
+            print "+"+'-'*14+"+"+'-'*19+"+"
             print "| %-12s | %-17s |" % ('Option','Value')
-            print "|"+'-'*14+"|"+'-'*19+"|"
+            print "+"+'-'*14+"+"+'-'*19+"+"
             for k,v in ec_opts.iteritems():
                 print "| %-12s | %-17s |" % (k,v['value'])
-            print "|"+'-'*14+"|"+'-'*19+"|"
+            print "+"+'-'*14+"+"+'-'*19+"+"
 
     def do_quit(self, param):
         print ""

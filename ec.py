@@ -7,7 +7,7 @@ import sys
 import base64
 
 # Global variable to store the various user-configurable options
-ec_opts = { 'REMOTEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the target machine. It is used to filter out unwanted traffic.' },
+ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 0, 'description':'This is the IP address of the client machine; from your point of view, it is the \'source address\' of the connections. It is used to filter out unwanted traffic.' },
             'TARGETIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
             'PORTSTART': { 'value': '1', 'default': '1', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the starting port for the egress attempt.' },
             'PORTFINISH': { 'value': '65535', 'default': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
@@ -17,7 +17,8 @@ ec_opts = { 'REMOTEIP': { 'value': '', 'default': '', 'validation':'^[0-9]+\.[0-
           }
 
 def generate_oneliner(lang):
-    if lang=='python':
+    pycmd = ''
+    if (lang=='python' or lang=='python-cmd'):
         pycmd = 'import time;import thread;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
         if int(ec_opts['VERBOSITY']['value'])>0:
             pycmd += 'r=sys.stdout;'
@@ -71,7 +72,32 @@ def generate_oneliner(lang):
         else:
             pycmd += "\n M(0.01)"
         pycmd += "\nK()"
-        return pycmd
+
+    elif lang=='tcpdump':
+        # Sort out the TCP capture filter
+        tcpdump_cmd = ['dst host'+ec_opts['TARGETIP']['value']]
+        tcpdump_cmd.append('dst portrange '+ec_opts['PORTSTART']['value']+'-'+ec_opts['PORTFINISH']['value'])
+        if (ec_opts['SOURCEIP']['value']!=''):
+            tcpdump_cmd.append('src host '+ec_opts['SOURCEIP']['value'])
+
+        # Now deal with protocol specifics
+        tcpdump_proto = []
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            tcpdump_proto.append('tcp[tcpflags]&tcp-syn)>0 && tcp')
+
+        if (ec_opts['PROTOCOL']['value']=='UCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            tcpdump_proto.append('udp')
+
+        pprint.pprint(tcpdump_cmd)
+        pprint.pprint(tcpdump_proto)
+        pass
+
+    return pycmd
+
+def print_supported_languages():
+    print "   python     | Generates a python egress buster script."
+    print "   python-cmd | Generates a python one-liner designed to be copied and pasted."
+    print "   tcpdump    | Generates the tcpdump capture command to be run on the target machine."
 
 class ec(cmd.Cmd):
 
@@ -80,15 +106,21 @@ class ec(cmd.Cmd):
     def do_generate(self, param):
         if param != '':
             cmdLang = param.split()[0].lower()
-            if cmdLang == 'python':
+            if (cmdLang == 'python' or cmdLang=='python-cmd'):
                 code = generate_oneliner(cmdLang)
-                print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
+                if (cmdLang=='python'):
+                    print code
+                elif (cmdLang=='python-cmd'):
+                    print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
             elif cmdLang == 'tcpdump':
+                code = generate_oneliner(cmdLang)
                 pass
             else:
                 print "Error: Invalid language specified."
+                print_supported_languages()
         else:
-            print "Error: Must specify a language. Currently, 'python' and 'tcpdump' are the only supported options." 
+            print "Error: Must specify a language."
+            print_supported_languages()
 
     def do_set(self, param):
         if param != '':

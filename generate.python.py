@@ -49,8 +49,6 @@ def portscan(ip,ports):
 def run_multithreaded(portarray):
     # Now go through and build the thread lists
     threadports = build_threads(threads,portarray)
-    import pprint
-    pprint.pprint(threadports)
     for i in threadports:
         threading.Thread(target=portscan, args=(ip_address,i,)).start()
     
@@ -107,8 +105,6 @@ def build_port_list(portstring):
 # Entry point
 def start():
     temp_port_list = build_port_list(port_string)
-    import pprint
-    pprint.pprint(temp_port_list)
     if temp_port_list==0:
         sys.exit(2)
     elif len(temp_port_list)>0:

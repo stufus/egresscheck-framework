@@ -1,0 +1,100 @@
+import socket
+F=len
+D=range
+C=int
+u=socket.socket
+B=socket.AF_INET
+d=socket.SOCK_STREAM
+s=socket.SOCK_DGRAM
+import sys
+K=sys.exit
+Y=sys.stdout
+import time
+z=time.sleep
+import threading
+T=threading.currentThread
+L=threading.Thread
+W=threading.enumerate
+j="127.0.0.1"
+p="22-25,53,80,389,443,445,993,3306,3389"
+k=2
+V=0.1
+def H(ip,base_port):
+ try:
+  Y.write('t');Y.flush()
+  n=u(B,d)
+  n.connect((ip,base_port))
+  n.close()
+ except:
+  pass
+def E(ip,base_port):
+ try:
+  Y.write('u');Y.flush()
+  w=u(B,s)
+  w.sendto('.',(ip,base_port))
+  w.close()
+ except:
+  pass
+def b(ip,ports):
+ for p in ports:
+  H(ip,p)
+  E(ip,p)
+  z(V)
+  Y.write('W');Y.flush()
+def Q(portarray):
+ y=O(k,portarray)
+ for i in y:
+  L(target=b,args=(j,i)).start()
+ N=T()
+ for t in W():
+  if t is not N:
+   t.join()
+def O(h,portarray):
+ y=[]
+ U=F(portarray)
+ if(U<h):
+  h=U
+ for i in D(h):
+  y.append([])
+ A=0
+ for i in portarray:
+  y[A].append(i)
+  if A==(h-1):
+   A=0
+  else:
+   A+=1
+ return y
+def l(portstring):
+ x=[]
+ r=portstring.split(',')
+ for i in r:
+  try:
+   m=C(i)
+   if m>0 and m<65536 and m not in x:
+    x.append(m)
+  except:
+   e=i.split('-')
+   if F(e)==2:
+    try:
+     M=C(e[0])
+     c=C(e[1])
+    except:
+     return 0
+    if M>0 and c<65536 and M<=c:
+     for c in D(M,c+1):
+      if c not in x:
+       x.append(c)
+    else:
+     return 0
+   else:
+    return 0
+ return x
+def R():
+ a=l(p)
+ if a==0:
+  K(2)
+ elif F(a)>0:
+  Q(a)
+ K(0)
+R()
+K(0)

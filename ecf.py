@@ -1,9 +1,11 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import re
+import os
 import cmd
 import signal
 import sys
 import base64
+import zlib
 import tempfile
 
 # Global variable to store the various user-configurable options
@@ -65,22 +67,22 @@ def generate_oneliner(lang):
         pycmd += "j=\""+ec_opts['TARGETIP']['value']+"\"\n"
         pycmd += "p=\""+ec_opts['PORTS']['value']+"\"\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "def H(ip,base_port):\n"
+            pycmd += "def H(ip,bP):\n"
             pycmd += " try:\n"
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "  Y.write('t');Y.flush()\n"
             pycmd += "  n=u(B,d)\n"
-            pycmd += "  n.connect((ip,base_port))\n"
+            pycmd += "  n.connect((ip,bP))\n"
             pycmd += "  n.close()\n"
             pycmd += " except:\n"
             pycmd += "  pass\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "def E(ip,base_port):\n"
+            pycmd += "def E(ip,bP):\n"
             pycmd += " try:\n"
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "  Y.write('u');Y.flush()\n"
             pycmd += "  w=u(B,s)\n"
-            pycmd += "  w.sendto('.',(ip,base_port))\n"
+            pycmd += "  w.sendto('.',(ip,bP))\n"
             pycmd += "  w.close()\n"
             pycmd += " except:\n"
             pycmd += "  pass\n"
@@ -90,36 +92,37 @@ def generate_oneliner(lang):
             pycmd += "  H(ip,p)\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "  E(ip,p)\n"
-        pycmd += "  z(V)\n"
         if int(ec_opts['VERBOSITY']['value'])>0:
             pycmd += "  Y.write('W');Y.flush()\n"
+        if ec_opts['DELAY']['value']!='0':
+            pycmd += "  z(V)\n"
         if int(ec_opts['THREADS']['value'])>1:
-            pycmd += "def Q(portarray):\n"
-            pycmd += " y=O(k,portarray)\n"
+            pycmd += "def Q(pa):\n"
+            pycmd += " y=O(k,pa)\n"
             pycmd += " for i in y:\n"
             pycmd += "  L(target=b,args=(j,i)).start()\n"
             pycmd += " N=T()\n"
             pycmd += " for t in W():\n"
             pycmd += "  if t is not N:\n"
             pycmd += "   t.join()\n"
-            pycmd += "def O(h,portarray):\n"
+            pycmd += "def O(h,pa):\n"
             pycmd += " y=[]\n"
-            pycmd += " U=F(portarray)\n"
+            pycmd += " U=F(pa)\n"
             pycmd += " if(U<h):\n"
             pycmd += "  h=U\n"
             pycmd += " for i in D(h):\n"
             pycmd += "  y.append([])\n"
             pycmd += " A=0\n"
-            pycmd += " for i in portarray:\n"
+            pycmd += " for i in pa:\n"
             pycmd += "  y[A].append(i)\n"
             pycmd += "  if A==(h-1):\n"
             pycmd += "   A=0\n"
             pycmd += "  else:\n"
             pycmd += "   A+=1\n"
             pycmd += " return y\n"
-        pycmd += "def l(portstring):\n"
+        pycmd += "def l(pS):\n"
         pycmd += " x=[]\n"
-        pycmd += " r=portstring.split(',')\n"
+        pycmd += " r=pS.split(',')\n"
         pycmd += " for i in r:\n"
         pycmd += "  try:\n"
         pycmd += "   m=C(i)\n"
@@ -181,15 +184,21 @@ def print_supported_languages():
     print "   python-cmd "+"| Generates a python one-liner designed to be copied and pasted."
     print "   tcpdump    "+"| Generates the tcpdump capture command to be run on the target machine."
 
+def write_file_data(prefix,suffix,data):
+    handle,filename = tempfile.mkstemp(suffix,prefix)
+    os.write(handle,data)
+    os.close(handle)
+    print colourise("Also written to: \033[4;35m"+filename,'0;35')
+
 class ec(cmd.Cmd):
 
     prompt = colourise('egresschecker>','0;36')+" "
 
     def do_generate(self, param):
         if ec_opts['TARGETIP']['value'].strip()=='':
-            print colourise('Error:','31;1')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
+            print colourise('Error:','1;31')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
         elif param == '':
-            print colourise('Error:','31;1')+" Must specify a language."
+            print colourise('Error:','1;31')+" Must specify a language."
             print_supported_languages()
         else:
             cmdLang = param.split()[0].lower()
@@ -197,20 +206,22 @@ class ec(cmd.Cmd):
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='python'):
                     print colourise('Run the code below on the client machine:','0;32')
-                    print 'import sys'
                     print code
+                    write_file_data('egress_','.py',code)
                 elif (cmdLang=='python-cmd'):
                     print colourise('Run the command below on the client machine:','0;32')
-                    print 'python -c \'import base64,sys;exec(base64.b64decode("'+base64.b64encode(code)+'"))\''
+                    cmdline = 'python -c \'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("'+base64.b64encode(zlib.compress(code))+'")))\''
+                    print cmdline
+                    write_file_data('egress_','.sh',cmdline)
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
                 print colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32')
                 print code[0]
                 print colourise('The command below will parse the saved capture file and display the ports on which connections were received:','0;32')
                 print code[1]
-                pass
+                write_file_data('capture_','.sh',code[0]+"\n"+code[1])
             else:
-                print colourise('Error:','31;1')+" Invalid language specified."
+                print colourise('Error:','1;31')+" Invalid language specified."
                 print_supported_languages()
 
     def complete_set(self, text, line, begidx, endidx):
@@ -232,11 +243,11 @@ class ec(cmd.Cmd):
                     ec_opts[cmdVariable]['value'] = cmdParam
                     print cmdVariable+' => '+cmdParam
                 else:
-                    print colourise('Error:','31;1')+" Invalid "+cmdVariable+" setting provided"
+                    print colourise('Error:','1;31')+" Invalid "+cmdVariable+" setting provided"
             else:
-                print colourise('Error:','31;1')+" "+cmdVariable+" is not recognised"
+                print colourise('Error:','1;31')+" "+cmdVariable+" is not recognised"
         else:
-            print colourise('Error:','31;1')+" Variable name and value required. Use \'get\' to see all variables."
+            print colourise('Error:','1;31')+" Variable name and value required. Use \'get\' to see all variables."
      
     def do_get(self, param):
         if param != '':
@@ -244,7 +255,7 @@ class ec(cmd.Cmd):
             if cmdVariable in ec_opts.keys():
                 print cmdVariable+' = '+ec_opts[cmdVariable]['value']
             else:
-                print colourise('Error:','31;1')+" "+cmdVariable+" not found"
+                print colourise('Error:','1;31')+" "+cmdVariable+" not found"
         else:  
             print "+"+'-'*14+"+"+'-'*19+"+"
             print "| %-12s | %-17s |" % ('Option','Value')

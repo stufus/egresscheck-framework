@@ -7,15 +7,12 @@ import socket
 import sys
 import time
 import threading
-import re
 
 # Set IP addresses and parameters
 ip_address = "127.0.0.1"
-port_string = "2,20-32,30-50"
-threads = 500
+port_string = "22-25,53,80,389,443,445,993,3306,3389"
+threads = 2
 sleeptime = 0.1
-
-portlist = []
 
 ######################## THESE FUNCTIONS DO THE PORTSCAN ###########################
 
@@ -45,12 +42,15 @@ def portscan(ip,ports):
         connect_tcp(ip,p)
         connect_udp(ip,p)
         time.sleep(sleeptime)
+        sys.stdout.write('W');sys.stdout.flush()
     
 ######################## THESE FUNCTIONS HANDLE MULTITHREADED SCANS ###########################
 
-def run_multithreaded():
+def run_multithreaded(portarray):
     # Now go through and build the thread lists
-    threadports = build_threads(threads,lowport,highport)
+    threadports = build_threads(threads,portarray)
+    import pprint
+    pprint.pprint(threadports)
     for i in threadports:
         threading.Thread(target=portscan, args=(ip_address,i,)).start()
     
@@ -61,23 +61,22 @@ def run_multithreaded():
             t.join()
 
 # Divvy up the ports into arrays to be scanned by each thread
-def build_threads(num_threads,lowport,highport):
+def build_threads(num_threads,portarray):
     # If there are too many threads, reduce down to the number needed
     threadports = []
-    if (1+highport-lowport)<num_threads:
-        num_threads = (1+highport-lowport)
+    portsize = len(portarray)
+    if (portsize<num_threads):
+        num_threads = portsize
     for i in range(num_threads):
         threadports.append([])
     groupcount=0
-    for i in range(lowport,highport+1):
+    for i in portarray:
         threadports[groupcount].append(i)
         if groupcount==(num_threads-1):
             groupcount=0
         else:
             groupcount+=1
     return threadports
-
-######################## THESE FUNCTIONS HANDLE SINGLE THREADED SCANS ###########################
 
 def build_port_list(portstring):
     temp_list = []
@@ -105,11 +104,19 @@ def build_port_list(portstring):
                 return 0
     return temp_list
 
-import pprint
-pprint.pprint(build_port_list(port_string))
+# Entry point
+def start():
+    temp_port_list = build_port_list(port_string)
+    import pprint
+    pprint.pprint(temp_port_list)
+    if temp_port_list==0:
+        sys.exit(2)
+    elif len(temp_port_list)>0:
+        run_multithreaded(temp_port_list)
+#        run_singlethreaded(temp_port_list)
+    sys.exit(0)
 
-def run_singlethreaded():
-    pass
+start()
 
 # Finally exit
 sys.exit(0)

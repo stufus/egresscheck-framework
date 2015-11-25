@@ -19,19 +19,19 @@ j="127.0.0.1"
 p="22-25,53,80,389,443,445,993,3306,3389"
 k=2
 V=0.1
-def H(ip,base_port):
+def H(ip,bP):
  try:
   Y.write('t');Y.flush()
   n=u(B,d)
-  n.connect((ip,base_port))
+  n.connect((ip,bP))
   n.close()
  except:
   pass
-def E(ip,base_port):
+def E(ip,bP):
  try:
   Y.write('u');Y.flush()
   w=u(B,s)
-  w.sendto('.',(ip,base_port))
+  w.sendto('.',(ip,bP))
   w.close()
  except:
   pass
@@ -41,32 +41,32 @@ def b(ip,ports):
   E(ip,p)
   z(V)
   Y.write('W');Y.flush()
-def Q(portarray):
- y=O(k,portarray)
+def Q(pa):
+ y=O(k,pa)
  for i in y:
   L(target=b,args=(j,i)).start()
  N=T()
  for t in W():
   if t is not N:
    t.join()
-def O(h,portarray):
+def O(h,pa):
  y=[]
- U=F(portarray)
+ U=F(pa)
  if(U<h):
   h=U
  for i in D(h):
   y.append([])
  A=0
- for i in portarray:
+ for i in pa:
   y[A].append(i)
   if A==(h-1):
    A=0
   else:
    A+=1
  return y
-def l(portstring):
+def l(pS):
  x=[]
- r=portstring.split(',')
+ r=pS.split(',')
  for i in r:
   try:
    m=C(i)

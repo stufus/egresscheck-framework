@@ -167,7 +167,7 @@ def generate_oneliner(lang):
         # Now deal with protocol specifics
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('((tcp[tcpflags]&(tcp-syn|tck-ack))==tcp-syn && tcp)')
+            tcpdump_proto.append('((tcp[tcpflags]&(tcp-syn|tcp-ack))==tcp-syn && tcp)')
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
         

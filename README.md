@@ -1,6 +1,6 @@
-# EgressChecker
+# EgressCheck Framework
 
-EgressChecker is a mini-framework which can be used to help check for egress filtering between your host and a client system on which you have the ability to execute commands and scripts.
+This is a mini-framework which can be used to help check for egress filtering between your host and a client system on which you have the ability to execute commands and scripts.
 
 ## Summary
 Most penetration testers have, at one time or another, had the need to measure or circumvent data egress security controls; red team exercises, targeted attack simulations and some internal penetration tests are good examples. For the purposes of simplicity, assume that there is an opportunity to execute code on either a Windows or a UNIX machine; the next stage would be to effectively 'portscan' your machine's IP address from the compromised machine in order to find out which ports can be used to egress data. 

@@ -15,7 +15,7 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
             'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' },
-            'THREADS': { 'value': '1', 'default': '1', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
+            'THREADS': { 'value': '50', 'default': '50', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }
 
 ec_generators = ['python','python-cmd','tcpdump']
@@ -73,6 +73,7 @@ def generate_oneliner(lang):
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "  Y.write('t');Y.flush()\n"
             pycmd += "  n=u(B,d)\n"
+            pycmd += "  n.setblocking(0)\n"
             pycmd += "  n.connect((ip,bP))\n"
             pycmd += "  n.close()\n"
             pycmd += " except:\n"
@@ -83,6 +84,7 @@ def generate_oneliner(lang):
             if int(ec_opts['VERBOSITY']['value'])>0:
                 pycmd += "  Y.write('u');Y.flush()\n"
             pycmd += "  w=u(B,s)\n"
+            pycmd += "  w.setblocking(0)\n"
             pycmd += "  w.sendto('.',(ip,bP))\n"
             pycmd += "  w.close()\n"
             pycmd += " except:\n"
@@ -93,10 +95,10 @@ def generate_oneliner(lang):
             pycmd += "  H(ip,p)\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "  E(ip,p)\n"
-        if int(ec_opts['VERBOSITY']['value'])>0:
-            pycmd += "  Y.write('W');Y.flush()\n"
         if ec_opts['DELAY']['value']!='0':
             pycmd += "  z(V)\n"
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "  Y.write('W');Y.flush()\n"
         if int(ec_opts['THREADS']['value'])>1:
             pycmd += "def Q(pa):\n"
             pycmd += " y=O(k,pa)\n"

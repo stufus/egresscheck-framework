@@ -11,7 +11,7 @@ import re
 
 # Set IP addresses and parameters
 ip_address = "127.0.0.1"
-port_string = "22,23-25,30-50"
+port_string = "2,20-32,30-50"
 threads = 500
 sleeptime = 0.1
 
@@ -48,17 +48,17 @@ def portscan(ip,ports):
     
 ######################## THESE FUNCTIONS HANDLE MULTITHREADED SCANS ###########################
 
-def run_multithreaded:
-	# Now go through and build the thread lists
-	threadports = build_threads(threads,lowport,highport)
-	for i in threadports:
-	    threading.Thread(target=portscan, args=(ip_address,i,)).start()
-	
-	# Now join the threads to the main one
-	main_thread = threading.currentThread()
-	for t in threading.enumerate():
-	    if t is not main_thread:
-	        t.join()
+def run_multithreaded():
+    # Now go through and build the thread lists
+    threadports = build_threads(threads,lowport,highport)
+    for i in threadports:
+        threading.Thread(target=portscan, args=(ip_address,i,)).start()
+    
+    # Now join the threads to the main one
+    main_thread = threading.currentThread()
+    for t in threading.enumerate():
+        if t is not main_thread:
+            t.join()
 
 # Divvy up the ports into arrays to be scanned by each thread
 def build_threads(num_threads,lowport,highport):
@@ -83,26 +83,33 @@ def build_port_list(portstring):
     temp_list = []
     chunks = portstring.split(',')
     for i in chunks:
-        single_val = int(i)
-        if single_val>0 and single_val<65536: # May be a single number
-            temp_list.append(i) if i not in temp_list
-        else:
-            chunk_range = chunks.split('-')
+        try:
+            single_val = int(i)
+            if single_val>0 and single_val<65536 and single_val not in temp_list: # May be a single number
+                temp_list.append(single_val)
+        except:
+            chunk_range = i.split('-')
             if len(chunk_range)==2:
-                lownum = int(chunk_range[0])
-                highnum = int(chunk_range[1])
+                try:
+                    lownum = int(chunk_range[0])
+                    highnum = int(chunk_range[1])
+                except:
+                    return 0
                 if lownum>0 and highnum<65536 and lownum<=highnum:
                     for c in range(lownum,highnum+1):
-                        temp_list.append(c) if c not in temp_list
+                        if c not in temp_list:
+                            temp_list.append(c)
                 else:
                     return 0
             else:
                 return 0
     return temp_list
 
+import pprint
 pprint.pprint(build_port_list(port_string))
 
-def run_singlethreaded:
+def run_singlethreaded():
+    pass
 
 # Finally exit
 sys.exit(0)

@@ -18,6 +18,7 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'THREADS': { 'value': '1', 'default': '1', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }
 
+ec_generators = ['python','python-cmd','tcpdump']
 ec_version = "v0.1-pre1"
 
 def colourise(string,colour):
@@ -126,7 +127,7 @@ def generate_oneliner(lang):
         pycmd += " for i in r:\n"
         pycmd += "  try:\n"
         pycmd += "   m=C(i)\n"
-        pycmd += "   if m>0 and m<65536 and m not in x:\n"
+        pycmd += "   if m>0 and m<65536:\n"
         pycmd += "    x.append(m)\n"
         pycmd += "  except:\n"
         pycmd += "   e=i.split('-')\n"
@@ -138,8 +139,7 @@ def generate_oneliner(lang):
         pycmd += "     return 0\n"
         pycmd += "    if M>0 and c<65536 and M<=c:\n"
         pycmd += "     for c in D(M,c+1):\n"
-        pycmd += "      if c not in x:\n"
-        pycmd += "       x.append(c)\n"
+        pycmd += "      x.append(c)\n"
         pycmd += "    else:\n"
         pycmd += "     return 0\n"
         pycmd += "   else:\n"
@@ -190,6 +190,31 @@ def write_file_data(prefix,suffix,data):
     os.close(handle)
     print colourise("Also written to: \033[4;35m"+filename,'0;35')
 
+def build_port_list(portstring):
+    temp_list = []
+    chunks = portstring.split(',')
+    for i in chunks:
+        try:
+            single_val = int(i)
+            if single_val>0 and single_val<65536: # May be a single number
+                temp_list.append(single_val)
+        except:
+            chunk_range = i.split('-')
+            if len(chunk_range)==2:
+                try:
+                    lownum = int(chunk_range[0])
+                    highnum = int(chunk_range[1])
+                except:
+                    return 0
+                if lownum>0 and highnum<65536 and lownum<=highnum:
+                    for c in range(lownum,highnum+1):
+                        temp_list.append(c)
+                else:
+                    return 0
+            else:
+                return 0
+    return temp_list
+
 class ec(cmd.Cmd):
 
     prompt = colourise('egresschecker>','0;36')+" "
@@ -224,6 +249,11 @@ class ec(cmd.Cmd):
                 print colourise('Error:','1;31')+" Invalid language specified."
                 print_supported_languages()
 
+    def complete_generate(self, text, line, begidx, endidx):
+        param = line.partition(' ')[2].lower()
+        offset = len(param) - len(text)
+        return [s[offset:] for s in ec_generators if s.startswith(param)]
+
     def complete_set(self, text, line, begidx, endidx):
         param = line.partition(' ')[2].upper()
         offset = len(param) - len(text)
@@ -238,10 +268,23 @@ class ec(cmd.Cmd):
         if param != '' and len(param.split())==2:
             cmdVariable = param.split()[0].upper()
             if cmdVariable in ec_opts.keys():
-                cmdParam = param.split()[1]
+                cmdParam = param.split()[1].upper()
                 if re.match(ec_opts[cmdVariable]['validation'],cmdParam):
-                    ec_opts[cmdVariable]['value'] = cmdParam
-                    print cmdVariable+' => '+cmdParam
+                    # Specific PORTS check
+                    if cmdVariable=='PORTS':
+                        finalports = build_port_list(cmdParam)
+                        if finalports==0:
+                            print colourise('Error:','1;31')+" Invalid "+cmdVariable+" specification"
+                        else:
+                            ec_opts[cmdVariable]['value'] = cmdParam
+                            finalword = 'port'
+                            finalcount = len(finalports)
+                            if (finalcount>1):
+                                finalword += 's'
+                            print cmdVariable+' => '+cmdParam+" ("+str(finalcount)+" "+finalword+")"
+                    else:
+                        ec_opts[cmdVariable]['value'] = cmdParam
+                        print cmdVariable+' => '+cmdParam
                 else:
                     print colourise('Error:','1;31')+" Invalid "+cmdVariable+" setting provided"
             else:
@@ -257,12 +300,13 @@ class ec(cmd.Cmd):
             else:
                 print colourise('Error:','1;31')+" "+cmdVariable+" not found"
         else:  
-            print "+"+'-'*14+"+"+'-'*19+"+"
-            print "| %-12s | %-17s |" % ('Option','Value')
-            print "+"+'-'*14+"+"+'-'*19+"+"
+            padding = "+"+'-'*14+"+"+'-'*29+"+"
+            print padding
+            print "| %-12s | %-27s |" % ('Option','Value')
+            print padding
             for k,v in ec_opts.iteritems():
-                print "| %-12s | %-17s |" % (k,v['value'])
-            print "+"+'-'*14+"+"+'-'*19+"+"
+                print "| %-12s | %-27s |" % (k,v['value'])
+            print padding
 
     def do_quit(self, param):
         print ""

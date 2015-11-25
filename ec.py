@@ -9,8 +9,7 @@ import tempfile
 # Global variable to store the various user-configurable options
 ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'required': 0, 'description':'This is the IP address of the client machine; from your point of view, it is the \'source address\' of the connections. It is used to filter out unwanted traffic.' },
             'TARGETIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
-            'PORTSTART': { 'value': '1', 'default': '1', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the starting port for the egress attempt.' },
-            'PORTFINISH': { 'value': '65535', 'default': '65535', 'validation':'^[0-9]+$', 'required': 1, 'description':'This is the finishing port for the egress attempt.' },
+            'PORTS': { 'value': '22-25,53,80,443,445,3306,3389', 'default': '22-25,53,80,443,445,3306,3389', 'validation':'^[-0-9,]+$', 'required': 1, 'description':'This is the port range to egress check.' },
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
             'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' },
@@ -39,71 +38,133 @@ def banner():
 def generate_oneliner(lang):
     pycmd = ''
     if (lang=='python' or lang=='python-cmd'):
-        pycmd = 'import time;import thread;import socket;X=int;t=socket.socket;K=sys.exit;M=time.sleep;C=thread.start_new_thread;c=socket.AF_INET;'
+		pycmd += "import socket\n"
+		pycmd += "import sys\n"
+		pycmd += "K=sys.exit\n"
+		pycmd += "F=len\n"
+		pycmd += "D=range\n"
+		pycmd += "C=int\n"
+		pycmd += "u=socket.socket\n"
+		pycmd += "B=socket.AF_INET\n"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+		    pycmd += "d=socket.SOCK_STREAM\n"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+		    pycmd += "s=socket.SOCK_DGRAM\n"
         if int(ec_opts['VERBOSITY']['value'])>0:
-            pycmd += 'r=sys.stdout;'
-        pycmd += 'ip="'+ec_opts['TARGETIP']['value']+'";'
-        pycmd += 'lp="'+ec_opts['PORTSTART']['value']+'";'
-        pycmd += 'hp="'+ec_opts['PORTFINISH']['value']+'";'
-        pycmd += 'E=X(lp);V=X(hp)'
+		    pycmd += "Y=sys.stdout\n"
+        if ec_opts['DELAY']['value']!='0':
+		    pycmd += "import time\n"
+		    pycmd += "z=time.sleep\n"
+		    pycmd += "V="+ec_opts['DELAY']['value']+"\n"
+        if int(ec_opts['THREADS']['value'])>1:
+		    pycmd += "import threading\n"
+		    pycmd += "T=threading.currentThread\n"
+		    pycmd += "L=threading.Thread\n"
+		    pycmd += "W=threading.enumerate\n"
+		    pycmd += "k="+ec_opts['THREADS']['value']+"\n"
+		pycmd += "j=\""+ec_opts['TARGETIP']['value']+"\"\n"
+		pycmd += "p=\""+ec_opts['PORTS']['value']+"\"\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\ndef H(ip,E):"
-            pycmd += "\n try:"
-            pycmd += "\n  B=t(c,socket.SOCK_STREAM)"
-            pycmd += "\n  B.connect((ip,E))"
-            pycmd += "\n  B.close()"
-            pycmd += "\n  K()"
-            if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += "\n except socket.error, msg:"
-                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']');r.flush()"
-            pycmd += "\n except:"
-            if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
-            else:
-                pycmd += "\n  pass"
-
+			pycmd += "def H(ip,base_port):\n"
+			pycmd += " try:\n"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+			    pycmd += "  Y.write('t');Y.flush()\n"
+			pycmd += "  n=u(B,d)\n"
+			pycmd += "  n.connect((ip,base_port))\n"
+			pycmd += "  n.close()\n"
+			pycmd += " except:\n"
+			pycmd += "  pass\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\ndef J(ip,E):"
-            pycmd += "\n try:"
-            pycmd += "\n  B=t(c,socket.SOCK_DGRAM)"
-            pycmd += "\n  B.sendto('.',(ip,E))"
-            pycmd += "\n  B.close()"
-            pycmd += "\n  K()"
-            if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += "\n except socket.error, msg:"
-                pycmd += "\n  r.write('[SockError('+str(E)+'):'+str(msg)+']');r.flush()"
-            pycmd += "\n except:"
-            if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += "\n  r.write('[Error:'+str(E)+']');r.flush()"
-            else:
-                pycmd += "\n  pass"
-
-        pycmd += "\nwhile E<V:"
-        pycmd += "\n E+=1"
+			pycmd += "def E(ip,base_port):\n"
+			pycmd += " try:\n"
+	        if int(ec_opts['VERBOSITY']['value'])>0:
+			    pycmd += "  Y.write('u');Y.flush()\n"
+			pycmd += "  w=u(B,s)\n"
+			pycmd += "  w.sendto('.',(ip,base_port))\n"
+			pycmd += "  w.close()\n"
+			pycmd += " except:\n"
+			pycmd += "  pass\n"
+		pycmd += "def b(ip,ports):\n"
+		pycmd += " for p in ports:\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n C(H,(ip,E))"
+		    pycmd += "  H(ip,p)\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            pycmd += "\n C(J,(ip,E))"
-        if int(ec_opts['VERBOSITY']['value'])>1:
-            pycmd += "\n if E%10==0:"
-            pycmd += "\n  r.write('.');r.flush()"
-        if ec_opts['DELAY']['value']:
-            pycmd += "\n M("+ec_opts['DELAY']['value']+")"
+		    pycmd += "  E(ip,p)\n"
+		pycmd += "  z(V)\n"
+        if int(ec_opts['VERBOSITY']['value'])>0:
+		    pycmd += "  Y.write('W');Y.flush()\n"
+        if int(ec_opts['THREADS']['value'])>1:
+			pycmd += "def Q(portarray):\n"
+			pycmd += " y=O(k,portarray)\n"
+			pycmd += " for i in y:\n"
+			pycmd += "  L(target=b,args=(j,i)).start()\n"
+			pycmd += " N=T()\n"
+			pycmd += " for t in W():\n"
+			pycmd += "  if t is not N:\n"
+			pycmd += "   t.join()\n"
+			pycmd += "def O(h,portarray):\n"
+			pycmd += " y=[]\n"
+			pycmd += " U=F(portarray)\n"
+			pycmd += " if(U<h):\n"
+			pycmd += "  h=U\n"
+			pycmd += " for i in D(h):\n"
+			pycmd += "  y.append([])\n"
+			pycmd += " A=0\n"
+			pycmd += " for i in portarray:\n"
+			pycmd += "  y[A].append(i)\n"
+			pycmd += "  if A==(h-1):\n"
+			pycmd += "   A=0\n"
+			pycmd += "  else:\n"
+			pycmd += "   A+=1\n"
+			pycmd += " return y\n"
+		pycmd += "def l(portstring):\n"
+		pycmd += " x=[]\n"
+		pycmd += " r=portstring.split(',')\n"
+		pycmd += " for i in r:\n"
+		pycmd += "  try:\n"
+		pycmd += "   m=C(i)\n"
+		pycmd += "   if m>0 and m<65536 and m not in x:\n"
+		pycmd += "    x.append(m)\n"
+		pycmd += "  except:\n"
+		pycmd += "   e=i.split('-')\n"
+		pycmd += "   if F(e)==2:\n"
+		pycmd += "    try:\n"
+		pycmd += "     M=C(e[0])\n"
+		pycmd += "     c=C(e[1])\n"
+		pycmd += "    except:\n"
+		pycmd += "     return 0\n"
+		pycmd += "    if M>0 and c<65536 and M<=c:\n"
+		pycmd += "     for c in D(M,c+1):\n"
+		pycmd += "      if c not in x:\n"
+		pycmd += "       x.append(c)\n"
+		pycmd += "    else:\n"
+		pycmd += "     return 0\n"
+		pycmd += "   else:\n"
+		pycmd += "    return 0\n"
+		pycmd += " return x\n"
+		pycmd += "def R():\n"
+		pycmd += " a=l(p)\n"
+		pycmd += " if a==0:\n"
+		pycmd += "  K(2)\n"
+		pycmd += " elif F(a)>0:\n"
+        if int(ec_opts['THREADS']['value'])>1:
+		    pycmd += "  Q(a)\n"
         else:
-            pycmd += "\n M(0.05)"
-        pycmd += "\nK()"
+            pycmd += "  b(j,a)\n"
+		pycmd += " K(0)\n"
+		pycmd += "R()\n"
+		pycmd += "K(0)\n"
 
     elif lang=='tcpdump':
         # Sort out the TCP capture filter
         tcpdump_cmd = ['dst host '+ec_opts['TARGETIP']['value']]
-        tcpdump_cmd.append('dst portrange '+ec_opts['PORTSTART']['value']+'-'+ec_opts['PORTFINISH']['value'])
         if (ec_opts['SOURCEIP']['value']!=''):
             tcpdump_cmd.append('src host '+ec_opts['SOURCEIP']['value'])
 
         # Now deal with protocol specifics
         tcpdump_proto = []
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
-            tcpdump_proto.append('((tcp[tcpflags]&tcp-syn)>0 && (tcp[tcpflags]&tcp-ack)==0 && tcp)')
+            tcpdump_proto.append('((tcp[tcpflags]&(tcp-syn|tck-ack))==tcp-syn && tcp)')
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             tcpdump_proto.append('(udp)')
         

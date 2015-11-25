@@ -13,7 +13,7 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'TARGETIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'required': 1, 'description':'This is the IP address that the client code will try to connect to.' },
             'PORTS': { 'value': '22-25,53,80,443,445,3306,3389', 'default': '22-25,53,80,443,445,3306,3389', 'validation':'^[-0-9,]+$', 'required': 1, 'description':'This is the port range to egress check.' },
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
-            'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[012]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=errors,2=progress.' },
+            'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[01]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=progress.' },
             'DELAY': { 'value': '0', 'default': '0', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' },
             'THREADS': { 'value': '50', 'default': '50', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }

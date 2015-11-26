@@ -193,8 +193,8 @@ PROTOCOL  | Determins the IP protocol to use; this can be one of 'TCP','UDP' or 
 VERBOSITY | This can be '0' or '1' and affects the output of the connect-back scripts. If '0' is set, the scripts will be as silent as they can be. If '1' is set, the script will output status information to stdout. This is in the form of letter codes; it will write a 't' to stdout if it is sending a TCP packet, 'u' if it is sending a UDP packet or 'W' if it is waiting (see the DELAY option).
 DELAY | The number of seconds to pause after sending the required packets to each port. If this is set to '0', the code which introduces the artificial delay will be omitted completely. Note that this is per-thread; if there are 10 threads, the per-thread routine is 'send TCP,send UDP,wait'.
 THREADS | The number of simultaneous threads to generate when performing the egress test. If this is set to '1', the multi-threading libraries and code will not be imported or used. If it set to more than 1, the required number of threads will be generated and the connections will be divided up between the ports.
-TARGETIP | This is the IP address that the connections should be targeted to. It is a required field and must be an IP address. It will be hardcoded into the dynamically generated connect-back scripts and is also used to generate the tcpdump filter.
-SOURCEIP | This is optional and is only used to make the tcpdump filter more specific. It should be set to the IP address that the connections will appear to come from (if known).
+TARGETIP | This is the IP address that the connections should be targeted to. It is a required field and must be an IPv4 IP address. It will be hardcoded into the dynamically generated connect-back scripts and is also used to generate the tcpdump filter.
+SOURCEIP | This is optional and is only used to make the tcpdump filter more specific. It should be set to the IPv4 IP address that the connections will appear to come from (if known).
 PORTS | The port numbers to try. This accepts a mix of individual IPs and ranges, separated by commas (in a similar style to basic nmap). For example: 22,23,24,25,30,80,81,82 and 22-25,30,80-82 would both be acceptable forms of notation.
 
 Where it makes sense, the parameters are tab-completable. 
@@ -211,11 +211,11 @@ Examples:
 egresschecker> set PORTS 22,23,25-30,80
 PORTS => 22,23,25-30,80 (9 ports)
 
-egresschecker> set TARGETIP 10.81.60.152
-TARGETIP => 10.81.60.152
+egresschecker> set TARGETIP 192.168.0.1
+TARGETIP => 192.168.0.1
 
-egresschecker> set SOURCEIP 10.82.200.153
-SOURCEIP => 10.82.200.153
+egresschecker> set SOURCEIP 10.0.0.1
+SOURCEIP => 10.0.0.1
 
 egresschecker> set PORTS 1-65535
 PORTS => 1-65535 (65535 ports)
@@ -233,6 +233,30 @@ egresschecker> set TARGET 10.81.60.152
 Where it makes sense, the parameters are tab-completable. 
 
 ### generate
+
+Format: generate <format>
+
+The generate command is used to produce the connect-back scripts to run on the compromised hosts, and to produce example tcpdump and tshark commands in order to capture and filter the connections on your machine.
+
+The available formats are tab-completable and currently comprise:
+
+Option  | Description
+------------- | -------------
+python | A raw python script which, when executed, will perform the egress test.
+python-cmd | A python one-liner which can be executed from the command line which has the same effect as above.
+tcpdump | The commands needed to record the connection attempts on your machine, and two example tshark commands to filter the packet captures in order to identify TCP and UDP incoming connections.
+
+Whenever the generate command is run, the relevant output will also be written to a temporary file to make it easier to transfer, execute or audit the scripts. For example, running 'generate python-cmd' will generate the one-liner and include a statement to the effect of:
+
+```
+Also written to: /tmp/egress_2015nov26_154558_6aWX1P.sh
+```
+
+The format of this name is <type-of-file>_<year><month><day>_<hh><mm><ss>_<random>.<extension>
+
+I have deliberately specified the month as a short name instead of a number to avoid the confusion over whether the date is in US format or UK format.
+
+The temporary files are not cleaned up after ECF exits; this is deliberate because it gives you the opportunity to hash or audit the files if needed as evidence during a simulated attack or other penetration test.
 
 ## Speed
 

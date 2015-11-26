@@ -58,6 +58,19 @@ PORTS => 1-65535 (65535 ports)
 egresschecker> set PROTOCOL all
 PROTOCOL => ALL
 
+egresschecker> get
++--------------+-----------------------------+
+| Option       | Value                       |
++--------------+-----------------------------+
+| PROTOCOL     | ALL                         |
+| VERBOSITY    | 0                           |
+| DELAY        | 0                           |
+| THREADS      | 25                          |
+| TARGETIP     | 192.168.0.1                 |
+| SOURCEIP     |                             |
+| PORTS        | 1-65535                     |
++--------------+-----------------------------+
+
 egresschecker> generate python-cmd
 
 Run the command below on the client machine:

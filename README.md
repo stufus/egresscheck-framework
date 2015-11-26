@@ -88,6 +88,38 @@ user    0m10.539s
 sys     0m10.521s
 ```
 
+An artificial delay of 100ms was configured and a new python one-liner was generated and tested. I have left this as a default simply to be a bit kinder to the target machine.
+
+```
+egresschecker> get
++--------------+-----------------------------+
+| Option       | Value                       |
++--------------+-----------------------------+
+| PROTOCOL     | ALL                         |
+| VERBOSITY    | 0                           |
+| DELAY        | 0.1                         |
+| THREADS      | 25                          |
+| TARGETIP     | 192.168.0.1                 |
+| SOURCEIP     |                             |
+| PORTS        | 1-65535                     |
++--------------+-----------------------------+
+
+egresschecker> generate python-cmd
+
+Run the command below on the client machine:
+python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8F...
+```
+
+With this delay, the script completed in just under 4 and a half minutes. 
+
+```
+$ time python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8F...
+
+real    4m23.189s
+user    0m7.228s
+sys     0m5.254s
+```
+
 ## FAQs
 ### Why tcpdump?
 

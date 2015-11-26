@@ -118,11 +118,12 @@ This can then be formatted using basic UNIX tools either for injection into othe
 ```
 stufus@me$ tshark -r /tmp/egress_2015nov26_130154_650H57.pcap -Tfields -eip.proto -eip.src -etcp.dstport tcp > /tmp/egress.tcp
 stufus@me$ cat /tmp/egress.tcp | awk '{ print $3 }' | xargs echo | sed 's/ /,/g'
-22,80,443
+21,80,443,8080
 stufus@me$ cat /tmp/egress.tcp | awk '{ print $2,":",$3 }' | sed 's/ //g'
-10.0.0.1:22
+10.0.0.1:21
 10.0.0.1:80
 10.0.0.1:443
+10.0.0.1:8080
 ```
 
 ## Mechanism

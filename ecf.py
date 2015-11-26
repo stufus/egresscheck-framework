@@ -221,6 +221,7 @@ def build_port_list(portstring):
 class ec(cmd.Cmd):
 
     prompt = colourise('egresschecker>','0;36')+" "
+    undoc_header = None
 
     def do_generate(self, param):
         "Generate client code to perform the egress check. Specify a target language.\nExample: generate python-cmd"
@@ -316,10 +317,12 @@ class ec(cmd.Cmd):
             print padding
 
     def do_quit(self, param):
+        "Exits the framework"
         print ""
         return True
 
     def do_exit(self, param):
+        "Exits the framework"
         print ""
         return True
 

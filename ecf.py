@@ -223,6 +223,7 @@ class ec(cmd.Cmd):
     prompt = colourise('egresschecker>','0;36')+" "
 
     def do_generate(self, param):
+        "Generate client code to perform the egress check. Specify a target language.\nExample: generate python-cmd"
         if ec_opts['TARGETIP']['value'].strip()=='':
             print colourise('Error:','1;31')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
         elif param == '':
@@ -269,6 +270,7 @@ class ec(cmd.Cmd):
         return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
 
     def do_set(self, param):
+        "Changes one of the stored options. Use 'get' without any parameters to see all options.\nExample: set PORTS 22,23,25-30"
         if param != '' and len(param.split())==2:
             cmdVariable = param.split()[0].upper()
             if cmdVariable in ec_opts.keys():
@@ -297,6 +299,7 @@ class ec(cmd.Cmd):
             print colourise('Error:','1;31')+" Variable name and value required. Use \'get\' to see all variables."
      
     def do_get(self, param):
+        "Retrieves the value of the given option. When used without any parameters, this will show all options.\nExample: get PORTS"
         if param != '':
             cmdVariable = param.split()[0].upper()
             if cmdVariable in ec_opts.keys():

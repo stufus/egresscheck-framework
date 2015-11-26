@@ -201,7 +201,7 @@ Where it makes sense, the parameters are tab-completable.
 
 ### set
 
-Format: set <option> <value>
+Format: set [option] [value]
 
 The 'set' command is used to change one of the options above. When setting an option, ECF will display the option name, a '=>' symbol and then the option value below it, for confirmation.
 
@@ -234,7 +234,7 @@ Where it makes sense, the parameters are tab-completable.
 
 ### generate
 
-Format: generate <format>
+Format: generate [format]
 
 The generate command is used to produce the connect-back scripts to run on the compromised hosts, and to produce example tcpdump and tshark commands in order to capture and filter the connections on your machine.
 
@@ -252,7 +252,7 @@ Whenever the generate command is run, the relevant output will also be written t
 Also written to: /tmp/egress_2015nov26_154558_6aWX1P.sh
 ```
 
-The format of this name is <type-of-file>_<year><month><day>_<hh><mm><ss>_<random>.<extension>
+The format of this name is [type-of-file]_[year][month][day]_[hh][mm][ss]_[random].[extension]
 
 I have deliberately specified the month as a short name instead of a number to avoid the confusion over whether the date is in US format or UK format.
 

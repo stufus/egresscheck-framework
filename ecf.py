@@ -7,6 +7,7 @@ import sys
 import base64
 import zlib
 import tempfile
+import datetime
 
 # Global variable to store the various user-configurable options
 ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'required': 0, 'description':'This is the IP address of the client machine; from your point of view, it is the \'source address\' of the connections. It is used to filter out unwanted traffic.' },
@@ -188,7 +189,8 @@ def print_supported_languages():
     print "   tcpdump    "+"| Generates the tcpdump capture command to be run on the target machine."
 
 def write_file_data(prefix,suffix,data):
-    handle,filename = tempfile.mkstemp(suffix,prefix)
+    date_time = datetime.datetime.now().strftime('%Y%b%d_%H%M%S').lower()
+    handle,filename = tempfile.mkstemp(suffix,prefix+date_time+'_')
     os.write(handle,data)
     os.close(handle)
     print colourise("Also written to: \033[4;35m"+filename,'0;35')

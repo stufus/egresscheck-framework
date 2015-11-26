@@ -175,7 +175,8 @@ def generate_oneliner(lang):
             tcpdump_proto.append('(udp)')
         
         # Now generate the tcpdump capture command line. Yes I know I'm using mktemp()...
-        tf = tempfile.mktemp('.pcap','egress_')
+        tmpname = 'egress_'+datetime.datetime.now().strftime('%Y%b%d_%H%M%S').lower()
+        tf = tempfile.mktemp('.pcap',tmpname)
         tcpdump_run = 'tcpdump -n -U -w '+tf+' \''+(' && '.join(tcpdump_cmd))+' && ('+'||'.join(tcpdump_proto)+')\''
         tshark_tcp_run = 'tshark -r '+tf+' -Tfields -eip.proto -eip.src -etcp.dstport tcp | sort -u #For received TCP'
         tshark_udp_run = 'tshark -r '+tf+' -Tfields -eip.proto -eip.src -eudp.dstport udp | sort -u #For received UDP'

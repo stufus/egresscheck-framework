@@ -120,9 +120,9 @@ stufus@me$ tshark -r /tmp/egress_2015nov26_130154_650H57.pcap -Tfields -eip.prot
 stufus@me$ cat /tmp/egress.tcp | awk '{ print $3 }' | xargs echo | sed 's/ /,/g'
 22,80,443
 stufus@me$ cat /tmp/egress.tcp | awk '{ print $2,":",$3 }' | sed 's/ //g'
-10.81.75.24:22
-10.81.75.24:80
-10.81.75.24:443
+10.0.0.1:22
+10.0.0.1:80
+10.0.0.1:443
 ```
 
 ## Mechanism

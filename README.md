@@ -228,6 +228,10 @@ If you attempt to set an invalid option, you will see an error message. For exam
 
 ```
 egresschecker> set TARGET 10.81.60.152
+
+Error: TARGET is not recognised
+
+egresschecker> 
 ```
 
 Where it makes sense, the parameters are tab-completable. 
@@ -292,8 +296,7 @@ egresschecker> get
 egresschecker> generate python-cmd
 
 Run the command below on the client machine:
-python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U9Fu...
-[snipped]
+python -c 'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("eJx9U9Fu....
 ```
 
 When this code was run on the target machine, the execution completed in 11.255 seconds. The packet capture on the source machine was analysed which showed the connections being received.
@@ -306,7 +309,7 @@ user    0m10.539s
 sys     0m10.521s
 ```
 
-An artificial delay of 100ms was configured and a new python one-liner was generated and tested. I have left this as a default simply to be a bit kinder to the target machine.
+An artificial delay of 100ms was configured and a new python one-liner was generated and tested. I have left this as a default simply to be a bit kinder to the target machine. However, I have tested this (without a delay) on a number of different systems and networks and have not noticed any problems.
 
 ```
 egresschecker> get

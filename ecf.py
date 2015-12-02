@@ -214,7 +214,7 @@ def generate_oneliner(lang):
             pycmd += " }\n"
             pycmd += " catch { } \n"
             pycmd += "}\n"
-        pycmd += "ec -ip \"192.0.2.1\" -pr \"20-30,40,50\"\n"
+        pycmd += "ec -ip \""+ec_opts['TARGETIP']['value']+"\" -pr \""+ec_opts['PORTS']['value']+"\"\n"
 
     elif lang=='tcpdump':
         # Sort out the TCP capture filter

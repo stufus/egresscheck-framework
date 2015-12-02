@@ -19,8 +19,8 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'THREADS': { 'value': '25', 'default': '25', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }
 
-ec_generators = ['python','python-cmd','tcpdump']
-ec_version = "v0.1-pre1"
+ec_generators = ['python','python-cmd','powershell','powershell-cmd','tcpdump']
+ec_version = "v0.1-pre2"
 
 def colourise(string,colour):
     return "\n\033["+colour+"m"+string+"\033[0m"
@@ -161,6 +161,61 @@ def generate_oneliner(lang):
         pycmd += "R()\n"
         pycmd += "K(0)\n"
 
+    if (lang=='powershell' or lang=='powershell-cmd'):
+		pycmd = "function ec {\n"
+		pycmd += " [CmdletBinding()] \n"
+		pycmd += " param([string]$ip, [string]$pr) \n"
+		pycmd += " $pr_split = $portrange -split ','\n"
+		pycmd += " $ports = @()\n"
+		pycmd += " foreach ($p in $pr_split) {\n"
+		pycmd += " if ($p -match '^[0-9]+-[0-9]+$') {\n"
+		pycmd += " $prange = $p -split '-'\n"
+		pycmd += " for ($c = [convert]::ToInt32($prange[0]);$c -le [convert]::ToInt32($prange[1]);$c++) {\n"
+		pycmd += " $ports += $c\n"
+		pycmd += " }\n"
+		pycmd += " } elseif ($p -match '^[0-9]+$') {\n"
+		pycmd += " $ports += $p\n"
+		pycmd += " } else {\n"
+		pycmd += " return\n"
+		pycmd += " }\n"
+		pycmd += " }\n"
+		pycmd += " foreach ($eachport in $ports) {\n"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            if int(ec_opts['VERBOSITY']['value'])>0:
+		        pycmd += " Write-Output \"Sending TCP/$eachport to $ip\"\n"
+		    pycmd += " _tcp -ip $ip -port $eachport\n"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            if int(ec_opts['VERBOSITY']['value'])>0:
+		        pycmd += " Write-Output \"Sending UDP/$eachport to $ip\"\n"
+		    pycmd += " _udp -ip $ip -port $eachport\n"
+		pycmd += " Start-Sleep -m (0.2*1000)\n"
+		pycmd += " }\n"
+		pycmd += "}\n"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+			pycmd += "function _tcp {\n"
+			pycmd += " [CmdletBinding()] \n"
+			pycmd += " param([string]$ip, [int]$port)\n"
+			pycmd += " try { \n"
+			pycmd += " $t = New-Object System.Net.Sockets.TCPClient \n"
+			pycmd += " $t.BeginConnect($ip, $port, $null, $null) | Out-Null\n"
+			pycmd += " $t.Close()\n"
+			pycmd += " }\n"
+			pycmd += " catch { } \n"
+			pycmd += "}\n"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+			pycmd += "function _udp {\n"
+			pycmd += " [CmdletBinding()] \n"
+			pycmd += " param([string]$ip, [int]$port)\n"
+			pycmd += " $d = [system.Text.Encoding]::UTF8.GetBytes(".")\n"
+			pycmd += " try { \n"
+			pycmd += " $t = New-Object System.Net.Sockets.UDPClient \n"
+			pycmd += " $t.Send($d, $d.Length, $ip, $port) | Out-Null\n"
+			pycmd += " $t.Close() \n"
+			pycmd += " }\n"
+			pycmd += " catch { } \n"
+			pycmd += "}\n"
+	    pycmd += "ec -ip \"192.0.2.1\" -pr \"20-30,40,50\"\n"
+
     elif lang=='tcpdump':
         # Sort out the TCP capture filter
         tcpdump_cmd = ['dst host '+ec_opts['TARGETIP']['value']]
@@ -185,9 +240,11 @@ def generate_oneliner(lang):
     return pycmd
 
 def print_supported_languages():
-    print "   python     "+"| Generates a python egress buster script."
-    print "   python-cmd "+"| Generates a python one-liner designed to be copied and pasted."
-    print "   tcpdump    "+"| Generates the tcpdump capture command to be run on the target machine."
+    print "   python         "+"| Generates a python egress buster script."
+    print "   python-cmd     "+"| Generates a python one-liner designed to be copied and pasted."
+    print "   powershell     "+"| Generates a powershell egress buster script."
+    print "   powershell-cmd "+"| Generates a powershell one-liner designed to be copied and pasted."
+    print "   tcpdump        "+"| Generates the tcpdump capture command to be run on the target machine."
 
 def write_file_data(prefix,suffix,data):
     date_time = datetime.datetime.now().strftime('%Y%b%d_%H%M%S').lower()
@@ -246,6 +303,17 @@ class ec(cmd.Cmd):
                     cmdline = 'python -c \'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("'+base64.b64encode(zlib.compress(code))+'")))\''
                     print cmdline
                     write_file_data('egress_','.sh',cmdline)
+            elif (cmdLang == 'powershell' or cmdLang=='powershell-cmd'):
+                code = generate_oneliner(cmdLang)
+                if (cmdLang=='powershell'):
+                    print colourise('Run the code below on the client machine:','0;32')
+                    print code
+                    write_file_data('egress_','.ps1',code)
+                elif (cmdLang=='powershell-cmd'):
+                    print colourise('Run the command below on the client machine:','0;32')
+                    cmdline = 'powershell.exe -nop -w hidden -e '+base64.b64encode(code)
+                    print cmdline
+                    write_file_data('egress_','.bat',cmdline)
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
                 print colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32')

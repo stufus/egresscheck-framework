@@ -311,7 +311,12 @@ class ec(cmd.Cmd):
                     write_file_data('egress_','.ps1',code)
                 elif (cmdLang=='powershell-cmd'):
                     print colourise('Run the command below on the client machine:','0;32')
-                    cmdline = 'powershell.exe -nop -w hidden -e '+base64.b64encode(code)
+                    # In powershell, data must be in unicode format (i.e. chr(0) in between each one)
+                    suppress_code = code.replace("\n","\r\n")
+                    unicode_code = ""
+                    for c in range(len(suppress_code)):
+                        unicode_code += suppress_code[c] + "\x00"
+                    cmdline = 'powershell.exe -nop -w hidden -e '+base64.b64encode(unicode_code)
                     print cmdline
                     write_file_data('egress_','.bat',cmdline)
             elif cmdLang == 'tcpdump':

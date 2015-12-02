@@ -163,58 +163,68 @@ def generate_oneliner(lang):
 
     if (lang=='powershell' or lang=='powershell-cmd'):
         pycmd = "function ec {\n"
-        pycmd += " [CmdletBinding()] \n"
-        pycmd += " param([string]$ip, [string]$pr) \n"
-        pycmd += " $pr_split = $portrange -split ','\n"
-        pycmd += " $ports = @()\n"
-        pycmd += " foreach ($p in $pr_split) {\n"
-        pycmd += " if ($p -match '^[0-9]+-[0-9]+$') {\n"
-        pycmd += " $prange = $p -split '-'\n"
-        pycmd += " for ($c = [convert]::ToInt32($prange[0]);$c -le [convert]::ToInt32($prange[1]);$c++) {\n"
-        pycmd += " $ports += $c\n"
-        pycmd += " }\n"
-        pycmd += " } elseif ($p -match '^[0-9]+$') {\n"
-        pycmd += " $ports += $p\n"
-        pycmd += " } else {\n"
-        pycmd += " return\n"
-        pycmd += " }\n"
-        pycmd += " }\n"
-        pycmd += " foreach ($eachport in $ports) {\n"
+        pycmd += "[CmdletBinding()]\n"
+        pycmd += "param([string]$ip, [string]$pr)\n"
+        pycmd += "$pr_split = $portrange -split ','\n"
+        pycmd += "$ports = @()\n"
+        pycmd += "foreach ($p in $pr_split) {\n"
+        pycmd += "if ($p -match '^[0-9]+-[0-9]+$'){\n"
+        pycmd += "$prange = $p -split '-'\n"
+        pycmd += "for ($c = [convert]::ToInt32($prange[0]);$c -le [convert]::ToInt32($prange[1]);$c++) {\n"
+        pycmd += "$ports += $c\n"
+        pycmd += "}\n"
+        pycmd += "} elseif ($p -match '^[0-9]+$'){\n"
+        pycmd += "$ports += $p\n"
+        pycmd += "} else {\n"
+        pycmd += "return\n"
+        pycmd += "}\n"
+        pycmd += "}\n"
+        pycmd += "foreach ($eachport in $ports) {\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += " Write-Output \"Sending TCP/$eachport to $ip\"\n"
+                pycmd += "Write-Output \"Sending TCP/$eachport to $ip\"\n"
             pycmd += " _tcp -ip $ip -port $eachport\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             if int(ec_opts['VERBOSITY']['value'])>0:
-                pycmd += " Write-Output \"Sending UDP/$eachport to $ip\"\n"
+                pycmd += "Write-Output \"Sending UDP/$eachport to $ip\"\n"
             pycmd += " _udp -ip $ip -port $eachport\n"
-        pycmd += " Start-Sleep -m (0.2*1000)\n"
-        pycmd += " }\n"
+        pycmd += "Start-Sleep -m (0.2*1000)\n"
+        pycmd += "}\n"
         pycmd += "}\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "function _tcp {\n"
-            pycmd += " [CmdletBinding()] \n"
-            pycmd += " param([string]$ip, [int]$port)\n"
-            pycmd += " try { \n"
-            pycmd += " $t = New-Object System.Net.Sockets.TCPClient \n"
-            pycmd += " $t.BeginConnect($ip, $port, $null, $null) | Out-Null\n"
-            pycmd += " $t.Close()\n"
-            pycmd += " }\n"
-            pycmd += " catch { } \n"
+            pycmd += "[CmdletBinding()] \n"
+            pycmd += "param([string]$ip, [int]$port)\n"
+            pycmd += "try {\n"
+            pycmd += "$t = New-Object System.Net.Sockets.TCPClient\n"
+            pycmd += "$t.BeginConnect($ip, $port, $null, $null)"
+            if (int(ec_opts['VERBOSITY']['value'])<1):
+                pycmd += " | Out-Null"
+            pycmd += "\n"
+            pycmd += "$t.Close()\n"
+            pycmd += "}\n"
+            pycmd += "catch { } \n"
             pycmd += "}\n"
         if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
             pycmd += "function _udp {\n"
-            pycmd += " [CmdletBinding()] \n"
-            pycmd += " param([string]$ip, [int]$port)\n"
-            pycmd += " $d = [system.Text.Encoding]::UTF8.GetBytes(\".\")\n"
-            pycmd += " try { \n"
-            pycmd += " $t = New-Object System.Net.Sockets.UDPClient \n"
-            pycmd += " $t.Send($d, $d.Length, $ip, $port) | Out-Null\n"
-            pycmd += " $t.Close() \n"
-            pycmd += " }\n"
-            pycmd += " catch { } \n"
+            pycmd += "[CmdletBinding()] \n"
+            pycmd += "param([string]$ip, [int]$port)\n"
+            pycmd += "$d = [system.Text.Encoding]::UTF8.GetBytes(\".\")\n"
+            pycmd += "try { \n"
+            pycmd += "$t = New-Object System.Net.Sockets.UDPClient\n"
+            pycmd += "$t.Send($d, $d.Length, $ip, $port)"
+            if (int(ec_opts['VERBOSITY']['value'])<1):
+                pycmd += " | Out-Null"
+            pycmd += "\n"
+            pycmd += "$t.Close()\n"
             pycmd += "}\n"
+            pycmd += "catch { }\n"
+            pycmd += "}\n"
+        if (int(ec_opts['VERBOSITY']['value'])>0):
+            pycmd += "Write-Host \"Started egress bust\"\n"
         pycmd += "ec -ip \""+ec_opts['TARGETIP']['value']+"\" -pr \""+ec_opts['PORTS']['value']+"\"\n"
+        if (int(ec_opts['VERBOSITY']['value'])>0):
+            pycmd += "Write-Host \"Finished egress bust\"\n"
 
     elif lang=='tcpdump':
         # Sort out the TCP capture filter
@@ -312,10 +322,9 @@ class ec(cmd.Cmd):
                 elif (cmdLang=='powershell-cmd'):
                     print colourise('Run the command below on the client machine:','0;32')
                     # In powershell, data must be in unicode format (i.e. chr(0) in between each one)
-                    suppress_code = code.replace("\n","\r\n")
                     unicode_code = ""
-                    for c in range(len(suppress_code)):
-                        unicode_code += suppress_code[c] + "\x00"
+                    for c in code.strip():
+                        unicode_code += c+"\x00"
                     cmdline = 'powershell.exe -nop -w hidden -e '+base64.b64encode(unicode_code)
                     print cmdline
                     write_file_data('egress_','.bat',cmdline)

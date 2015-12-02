@@ -16,7 +16,7 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[01]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=progress.' },
             'DELAY': { 'value': '0.1', 'default': '0.1', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' },
-            'THREADS': { 'value': '25', 'default': '25', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
+            'THREADS': { 'value': '25', 'default': '25', 'validation':'^[1-9][0-9]{0,5}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }
 
 ec_generators = ['python','python-cmd','powershell','powershell-cmd','tcpdump']
@@ -161,8 +161,8 @@ def generate_oneliner(lang):
         pycmd += "R()\n"
         pycmd += "K(0)\n"
 
-    if (lang=='powershell' or lang=='powershell-cmd'):
-        pycmd = "$ip = \""+ec_opts['TARGETIP']['value']+"\"\n"
+    elif (lang=='powershell' or lang=='powershell-cmd'):
+        pycmd += "$ip = \""+ec_opts['TARGETIP']['value']+"\"\n"
         pycmd += "$pr = \""+ec_opts['PORTS']['value']+"\" -split ','\n"
         pycmd += "foreach ($p in $pr) {\n"
         pycmd += " if ($p -match '^[0-9]+-[0-9]+$') {\n"
@@ -172,6 +172,8 @@ def generate_oneliner(lang):
         pycmd += " } elseif ($p -match '^[0-9]+$') {\n"
         pycmd += "  $high = $p\n"
         pycmd += "  $low = $p\n"
+        pycmd += " } else {\n"
+        pycmd += "  return\n"
         pycmd += " }\n"
         pycmd += " for ($c = [convert]::ToInt32($low);$c -le [convert]::ToInt32($high);$c++) {\n"
         if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
@@ -288,6 +290,8 @@ class ec(cmd.Cmd):
                     print cmdline
                     write_file_data('egress_','.sh',cmdline)
             elif (cmdLang == 'powershell' or cmdLang=='powershell-cmd'):
+                if int(ec_opts['THREADS']['value'])>1:
+                    print colourise("Warning:",'0;33')+" The powershell code does not support multiple threads; it will generate packets asynchronously but on a single thread only."
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='powershell'):
                     print colourise('Run the code below on the client machine:','0;32')

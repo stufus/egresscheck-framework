@@ -1,6 +1,5 @@
-
-
-function egresscheck {
+# Perform the egress check
+function ec {
     [CmdletBinding()]                                                                                                                                                                           
     param([string]$ip, [string]$pr) 
 
@@ -20,16 +19,17 @@ function egresscheck {
         }
     }
 
-    $ports
-
     foreach ($eachport in $ports) {
-		Write-Output "_tcp -ip $ip -port $eachport"
-		Write-Output "_udp -ip $ip -port $eachport"
+        Write-Output "Sending TCP/$eachport to $ip"
+		_tcp -ip $ip -port $eachport
+        Write-Output "Sending UDP/$eachport to $ip"
+		_udp -ip $ip -port $eachport
+        Start-Sleep -m (0.2*1000)
     }
 
-    #Write-Output "Finished"     
 }
 
+# Send the TCP packet async
 function _tcp {
     [CmdletBinding()]                                                                                                                                                                           
     param([string]$ip, [int]$port)
@@ -43,19 +43,19 @@ function _tcp {
 	catch { }  
 }
 
+# Send the UDP packet async
 function _udp {
     [CmdletBinding()]                                                                                                                                                                           
     param([string]$ip, [int]$port)
 
+    $d = [system.Text.Encoding]::UTF8.GetBytes(".")
 	try {                                                                                                                                                                                       
 		$t = New-Object System.Net.Sockets.UDPClient       
-        $t.BeginSend(".", 1, $ip, $port, $null, $null) | Out-Null
-        $t.Close()
-        
+        $t.Send($d, $d.Length, $ip, $port) | Out-Null
+        $t.Close()        
 	}
 	catch { }  
 }
 
-$ip = "127.0.0.1"
-$portrange = "20-30,40,50"
-egresscheck -ip $ip -pr $portrange
+# Set the parameters
+ec -ip "192.0.2.1" -pr "20-30,40,50"

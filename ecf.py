@@ -303,7 +303,7 @@ class ec(cmd.Cmd):
                     unicode_code = ""
                     for c in code.strip():
                         unicode_code += c+"\x00"
-                    cmdline = 'powershell.exe -nop -w hidden -e '+base64.b64encode(unicode_code)
+                    cmdline = 'powershell.exe -e '+base64.b64encode(unicode_code)
                     print cmdline
                     write_file_data('egress_','.bat',cmdline)
             elif cmdLang == 'tcpdump':
@@ -324,6 +324,11 @@ class ec(cmd.Cmd):
         return [s[offset:] for s in ec_generators if s.startswith(param)]
 
     def complete_set(self, text, line, begidx, endidx):
+        param = line.partition(' ')[2].upper()
+        offset = len(param) - len(text)
+        return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
+
+    def complete_unset(self, text, line, begidx, endidx):
         param = line.partition(' ')[2].upper()
         offset = len(param) - len(text)
         return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]

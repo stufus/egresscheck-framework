@@ -254,10 +254,10 @@ tcpdump | The commands needed to record the connection attempts on your machine,
 
 The table below summarises the capabilities of the currently available client-side scripts (i.e. those that generate the egress traffic):
 
-Option  | Supports TCP | Supports UDP | Supports threads | Async Sockets | One-liner
+Option  | Supports TCP | Supports UDP | Supports threads | Non-blocking Sockets | One-liner
 --------| ----------- | ------------- | ------------- | ------------- | ------------- 
-python | Yes | Yes | Yes | No | Yes - python-cmd
-powershell | Yes | Yes | No | Yes | Yes - powershell-cmd
+python | Yes | Yes | Yes | Yes | Yes (_python-cmd_)
+powershell | Yes | Yes | No | Yes | Yes (_powershell-cmd_)
 
 Whenever the generate command is run, the relevant output will also be written to a temporary file to make it easier to transfer, execute or audit the scripts. For example, running 'generate python-cmd' will generate the one-liner and include a statement to the effect of:
 

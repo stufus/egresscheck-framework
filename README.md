@@ -249,7 +249,7 @@ Option  | Description
 python | A raw python script which, when executed, will perform the egress test.
 python-cmd | A python one-liner which can be executed from the command line which has the same effect as above.
 powershell | A raw powershell script which, when executed, will perform the egress test.
-powershell | A powershell one-liner which can be executed from the command line which has the same effect as above.
+powershell-cmd | A powershell one-liner which can be executed from the command line which has the same effect as above.
 tcpdump | The commands needed to record the connection attempts on your machine, and two example tshark commands to filter the packet captures in order to identify TCP and UDP incoming connections.
 
 The table below summarises the capabilities of the currently available client-side scripts (i.e. those that generate the egress traffic):

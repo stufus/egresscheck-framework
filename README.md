@@ -133,7 +133,7 @@ On the basis of the example above, this tool will allow you to connect to 192.16
 
 The basic approach is to:
 
-* Generate a 'one-liner' that can be run on the client. Currently, ECF can only generate one-liners in python, but I'll add other scripts in the fullness of time.
+* Generate a 'one-liner' that can be run on the client. Currently, ECF can generate one-liners in python and powershell, but I'll add other scripts in the fullness of time.
 * Use tcpdump to monitor connections to your machine. ECF will print the command that you need to run to perform the necessary capturing and filtering. If used in TCP mode, it just looks for SYN packets. Tcpdump will be configured to save the filtered capture file.
 * Parse the tcpdump file, from which the results can be displayed in a number of formats, useful for other tools or simply for reporting. Currently, *tshark* is used as a pcap parser; ECF provides the parameters to pass to tshark.
 
@@ -248,7 +248,16 @@ Option  | Description
 ------------- | -------------
 python | A raw python script which, when executed, will perform the egress test.
 python-cmd | A python one-liner which can be executed from the command line which has the same effect as above.
+powershell | A raw powershell script which, when executed, will perform the egress test.
+powershell | A powershell one-liner which can be executed from the command line which has the same effect as above.
 tcpdump | The commands needed to record the connection attempts on your machine, and two example tshark commands to filter the packet captures in order to identify TCP and UDP incoming connections.
+
+The table below summarises the capabilities of the currently available client-side scripts (i.e. those that generate the egress traffic):
+
+Option  | Supports TCP | Supports UDP | Supports threads | Async Sockets | One-liner
+--------| ----------- | ------------- | ------------- | ------------- | ------------- 
+python | Yes | Yes | Yes | No | Yes - python-cmd
+powershell | Yes | Yes | No | Yes | Yes - powershell-cmd
 
 Whenever the generate command is run, the relevant output will also be written to a temporary file to make it easier to transfer, execute or audit the scripts. For example, running 'generate python-cmd' will generate the one-liner and include a statement to the effect of:
 

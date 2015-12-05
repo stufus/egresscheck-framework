@@ -16,11 +16,11 @@ ec_opts = { 'SOURCEIP': { 'value': '', 'default': '', 'validation':'^((25[0-5]|2
             'PROTOCOL': { 'value': 'TCP', 'default': 'TCP', 'validation':'^(TCP|UDP|ALL)$', 'required': 1, 'description':'Chooses the protocol to use. Can be one of \'TCP\', \'UDP\' or \'ALL\' (attempts both TCP and UDP).' },
             'VERBOSITY': { 'value': '0', 'default': '0', 'validation':'^[01]$', 'required': 1, 'description':'Verbosity of the generated egress busting code. 0=none,1=progress.' },
             'DELAY': { 'value': '0.1', 'default': '0.1', 'validation':'^[0-9]+(\.[0-9]{1,2})?$', 'required': 1, 'description':'Delay between generation of packets.' },
-            'THREADS': { 'value': '25', 'default': '25', 'validation':'^[0-9]{1,8}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
+            'THREADS': { 'value': '25', 'default': '25', 'validation':'^[1-9][0-9]{0,5}$', 'required': 1, 'description':'Number of simultaneous packet-generation threads to spawn.' }
           }
 
-ec_generators = ['python','python-cmd','tcpdump']
-ec_version = "v0.1-pre1"
+ec_generators = ['python','python-cmd','powershell','powershell-cmd','tcpdump']
+ec_version = "v0.1-pre2"
 
 def colourise(string,colour):
     return "\n\033["+colour+"m"+string+"\033[0m"
@@ -161,6 +161,47 @@ def generate_oneliner(lang):
         pycmd += "R()\n"
         pycmd += "K(0)\n"
 
+    elif (lang=='powershell' or lang=='powershell-cmd'):
+        pycmd += "$ip = \""+ec_opts['TARGETIP']['value']+"\"\n"
+        pycmd += "$pr = \""+ec_opts['PORTS']['value']+"\" -split ','\n"
+        pycmd += "foreach ($p in $pr) {\n"
+        pycmd += " if ($p -match '^[0-9]+-[0-9]+$') {\n"
+        pycmd += "  $prange = $p -split '-'\n"
+        pycmd += "  $high = $prange[1]\n"
+        pycmd += "  $low = $prange[0]\n"
+        pycmd += " } elseif ($p -match '^[0-9]+$') {\n"
+        pycmd += "  $high = $p\n"
+        pycmd += "  $low = $p\n"
+        pycmd += " } else {\n"
+        pycmd += "  return\n"
+        pycmd += " }\n"
+        pycmd += " for ($c = [convert]::ToInt32($low);$c -le [convert]::ToInt32($high);$c++) {\n"
+        if (ec_opts['PROTOCOL']['value']=='TCP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "  Write-Host -NoNewLine \"t\"\n"
+            pycmd += "  try {\n"
+            pycmd += "   $t = New-Object System.Net.Sockets.TCPClient\n"
+            pycmd += "   $t.BeginConnect($ip, $c, $null, $null) | Out-Null\n"
+            pycmd += "   $t.Close()\n"
+            pycmd += "  }\n"
+            pycmd += "  catch { }\n"
+        if (ec_opts['PROTOCOL']['value']=='UDP') or (ec_opts['PROTOCOL']['value']=='ALL'):
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "  Write-Host -NoNewLine \"u\"\n"
+            pycmd += "  $d = [system.Text.Encoding]::UTF8.GetBytes(\".\")\n"
+            pycmd += "  try {\n"
+            pycmd += "   $t = New-Object System.Net.Sockets.UDPClient\n"
+            pycmd += "   $t.Send($d, $d.Length, $ip, $c) | Out-Null\n"
+            pycmd += "   $t.Close()\n"
+            pycmd += "  }\n"
+            pycmd += "  catch { }\n"
+        if ec_opts['DELAY']['value']!='0':
+            if int(ec_opts['VERBOSITY']['value'])>0:
+                pycmd += "  Write-Host -NoNewLine \"W\"\n"
+            pycmd += "  Start-Sleep -m ("+ec_opts['DELAY']['value']+"*1000)\n"
+        pycmd += " }\n"
+        pycmd += "}\n"
+
     elif lang=='tcpdump':
         # Sort out the TCP capture filter
         tcpdump_cmd = ['dst host '+ec_opts['TARGETIP']['value']]
@@ -185,9 +226,11 @@ def generate_oneliner(lang):
     return pycmd
 
 def print_supported_languages():
-    print "   python     "+"| Generates a python egress buster script."
-    print "   python-cmd "+"| Generates a python one-liner designed to be copied and pasted."
-    print "   tcpdump    "+"| Generates the tcpdump capture command to be run on the target machine."
+    print "   python         "+"| Generates a python egress buster script."
+    print "   python-cmd     "+"| Generates a python one-liner designed to be copied and pasted."
+    print "   powershell     "+"| Generates a powershell egress buster script."
+    print "   powershell-cmd "+"| Generates a powershell one-liner designed to be copied and pasted."
+    print "   tcpdump        "+"| Generates the tcpdump capture command to be run on the target machine."
 
 def write_file_data(prefix,suffix,data):
     date_time = datetime.datetime.now().strftime('%Y%b%d_%H%M%S').lower()
@@ -246,6 +289,23 @@ class ec(cmd.Cmd):
                     cmdline = 'python -c \'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("'+base64.b64encode(zlib.compress(code))+'")))\''
                     print cmdline
                     write_file_data('egress_','.sh',cmdline)
+            elif (cmdLang == 'powershell' or cmdLang=='powershell-cmd'):
+                if int(ec_opts['THREADS']['value'])>1:
+                    print colourise("Warning:",'0;33')+" The powershell code does not support multiple threads; it will generate packets asynchronously but on a single thread only."
+                code = generate_oneliner(cmdLang)
+                if (cmdLang=='powershell'):
+                    print colourise('Run the code below on the client machine:','0;32')
+                    print code
+                    write_file_data('egress_','.ps1',code)
+                elif (cmdLang=='powershell-cmd'):
+                    print colourise('Run the command below on the client machine:','0;32')
+                    # In powershell, data must be in unicode format (i.e. chr(0) in between each one)
+                    unicode_code = ""
+                    for c in code.strip():
+                        unicode_code += c+"\x00"
+                    cmdline = 'powershell.exe -e '+base64.b64encode(unicode_code)
+                    print cmdline
+                    write_file_data('egress_','.bat',cmdline)
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
                 print colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32')
@@ -264,6 +324,11 @@ class ec(cmd.Cmd):
         return [s[offset:] for s in ec_generators if s.startswith(param)]
 
     def complete_set(self, text, line, begidx, endidx):
+        param = line.partition(' ')[2].upper()
+        offset = len(param) - len(text)
+        return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]
+
+    def complete_unset(self, text, line, begidx, endidx):
         param = line.partition(' ')[2].upper()
         offset = len(param) - len(text)
         return [s[offset:] for s in ec_opts.keys() if s.startswith(param)]

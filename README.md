@@ -379,6 +379,10 @@ Yes in that it is, at heart, very basic. There are two parts; a client (which ge
 
 Penetration testers looking to identify egress channels during engagements, and system administrators who wish to audit their systems to test the basic effectiveness of their firewall configuration.
 
+### Limitations
+
+From a TCP perspective, it does only look for the presence of a SYN packet; an IDS or deep inspection system may permit SYN/SYN+ACK but no data.
+
 ## Other (compatible) tools
 
-You could use CyberIs' Egresser (https://github.com/cyberisltd/Egresser) by Geoff Jones; it was that tool that inspired me to build on the idea and I owe him a shout out for it. I haven't implemented a perl egress client because you might as well use the client side portion of that if you need one.
+You could use CyberIs' Egresser (https://github.com/cyberisltd/Egresser) by Geoff Jones; it was that tool that inspired me to build on the idea and I owe him a shout out for it. I haven't implemented a perl egress client because you might as well use the client side portion of that if you need one. Do bear in mind that his tool works slightly differently in that the client side tool aggregates the results (based on the server effectively reflecting them); ECF relies on the server component doing all of the work.

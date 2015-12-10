@@ -359,7 +359,7 @@ One tool used scapy to sniff packets; despite being a very elegant approach, I f
 
 Another tool worked by opening up listening sockets on a large number of ports on your machine, and monitoring connections to them. Nothing wrong with it, but you can't do too many at once, and I wanted a solution that would sniff the packets (meaning that you may not have to drop your software firewall, nor would you need to kill any existing listeners that you have).
 
-A different tool worked by using iptables to redirect all traffic to a single port, and monitored that port. I couldn't use it because FreeBSD doesn't have iptables, so it did not work for me.
+A different tool worked by using iptables to redirect all traffic to a single port, and monitored that port. I couldn't use it because FreeBSD doesn't have iptables, so it did not work for me but it was a really nice idea.
 
 Using tcpdump has a few other benefits too; for example, it does not require listeners to be set up. In addition, this technique could easily be used on machines several layers deep on a target network. If access to a machine has been compromised through a pivot with sufficient privileges to dump traffic, internal egress could be assessed too.
 
@@ -378,3 +378,7 @@ Yes in that it is, at heart, very basic. There are two parts; a client (which ge
 ### Who is the intended audience?
 
 Penetration testers looking to identify egress channels during engagements, and system administrators who wish to audit their systems to test the basic effectiveness of their firewall configuration.
+
+## Other (compatible) tools
+
+You could use CyberIs' Egresser (https://github.com/cyberisltd/Egresser) by Geoff Jones; it was that tool that inspired me to build on the idea and I owe him a shout out for it. I haven't implemented a perl egress client because you might as well use the client side portion of that if you need one.

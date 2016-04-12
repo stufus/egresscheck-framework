@@ -378,3 +378,7 @@ Yes in that it is, at heart, very basic. There are two parts; a client (which ge
 ### Who is the intended audience?
 
 Penetration testers looking to identify egress channels during engagements, and system administrators who wish to audit their systems to test the basic effectiveness of their firewall configuration.
+
+# Further Reading
+
+https://labs.mwrinfosecurity.com/blog/egress-checking/

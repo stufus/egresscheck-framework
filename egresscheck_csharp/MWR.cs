@@ -31,8 +31,7 @@ namespace egresscheck_csharp
                 UdpClient s = new UdpClient(ip, port);
                 s.Send(new byte['.'], 1);
                 s.Close();
-            }
-            catch (Exception e) { Console.WriteLine(e.Message); }
+            } catch { return; }
         }
 
         static void ec(string ip, string ports)
@@ -58,51 +57,48 @@ namespace egresscheck_csharp
             foreach (int i in allports)
             {
                 udp(ip, i);
-
-                Console.WriteLine(i.ToString());
-/*
                 IAsyncResult r = tcp(ip, i);
                 if (r != null)
                     sockets.Add(r);
-
-                // Wait for the async operations to be complete
-                foreach (IAsyncResult a in sockets)
-                    a.AsyncWaitHandle.WaitOne();
-*/
             }
 
+            // Wait for the async operations to be complete
+            foreach (IAsyncResult a in sockets)
+                a.AsyncWaitHandle.WaitOne();
+
+
         }
 
 
-            /*
-    $pr_split = $portrange -split ','
-    $ports = @()
-    foreach ($p in $pr_split) {
-        if ($p -match '^[0-9]+-[0-9]+$') {
-            $prange = $p -split '-'
-            for ($c = [convert]::ToInt32($prange[0]);$c -le[convert]::ToInt32($prange[1]);$c++) {
-                $ports += $c
-    }
+        /*
+$pr_split = $portrange -split ','
+$ports = @()
+foreach ($p in $pr_split) {
+    if ($p -match '^[0-9]+-[0-9]+$') {
+        $prange = $p -split '-'
+        for ($c = [convert]::ToInt32($prange[0]);$c -le[convert]::ToInt32($prange[1]);$c++) {
+            $ports += $c
+}
 }
 elseif($p - match '^[0-9]+$') {
-            $ports += $p
-        } else
+        $ports += $p
+    } else
 {
 # Error in port definition
-    return
-        }
+return
     }
+}
 
-    foreach ($eachport in $ports) {
-    Write - Output "Sending TCP/$eachport to $ip"
-                _tcp - ip $ip - port $eachport
-        Write - Output "Sending UDP/$eachport to $ip"
-                _udp - ip $ip - port $eachport
-        Start - Sleep - m(0.2 * 1000)
-    }
+foreach ($eachport in $ports) {
+Write - Output "Sending TCP/$eachport to $ip"
+            _tcp - ip $ip - port $eachport
+    Write - Output "Sending UDP/$eachport to $ip"
+            _udp - ip $ip - port $eachport
+    Start - Sleep - m(0.2 * 1000)
+}
 
 }
-            */
+        */
 
     }
             
